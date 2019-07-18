@@ -29,21 +29,9 @@ blockquote p {
 
 
 
-* 昵&nbsp;称&nbsp;: **smallkiss**  
+* 昵&nbsp;称&nbsp;: **ontitaner**  
    
 * Email: <a href="mailto:ontitan.esc@gmail.com">ontitan.esc@gmail.com</a><br />
-
-* 博&nbsp;&nbsp;客: <a href="http://smallkiss.github.io/">smallkiss</a>  
-
-* Git@OSC : <a href="http://git.oschina.net/smallkiss">@smallkiss</a>  
-
-* GitHub  :[smallkiss](https://github.com/smallkiss)  
-
-* Stack Overflow : smallkiss  
-
-* SegmentFault :[smallkiss](http://segmentfault.com/u/smallkiss)  
-
-* **Resume**:[smallkiss](http://smallkiss.digitcv.com/#/resume)  
 
 * ....  
 
@@ -61,7 +49,7 @@ blockquote p {
 	  
 	+ 项目介绍: **CMMB数字广播信号测试与分析软件**  
 	
-	+ **项目链接:** [CMMB数字广播信号测试与分析软件归档](http://smallkiss.github.io/blog/2015/07/28/Project_CMMB.html)  
+	+ **项目链接:** [CMMB数字广播信号测试与分析软件归档](http://ontitaner.github.io/blog/2015/07/28/Project_CMMB.html)  
 	
 	+ 项目成果: 目前已申请一份**软件著作权**和一份**发明专利**```已获受理```  
 	
@@ -73,7 +61,7 @@ blockquote p {
 	
 	+ 项目介绍: **对下位机通过总线上传的数据进行管理和图形化显示、根据用户的操作通过总线向下位机发送相应的数据、对数据库进行管理，及对图形进行编辑等操作**  
 	
-	+ **项目链接:** [智能消防疏散管理系统归档](http://smallkiss.github.io/blog/2015/07/27/Project_FireSystem.html)  
+	+ **项目链接:** [智能消防疏散管理系统归档](http://ontitaner.github.io/blog/2015/07/27/Project_FireSystem.html)  
 	
 	+ 项目成果:  
 
@@ -95,9 +83,7 @@ blockquote p {
   
   - 项目介绍: **仿QQ侧滑菜单，利用JSoap爬虫解析HTML获取相关内容**
   
-  - 项目链接: [NewsDev归档](http://smallkiss.github.io/blog/2015/07/27/Project_CSDN.html)
-  
-  - Repo地址: [Android_NewsDev](https://github.com/SmallKiss/CSDN_BLOG)
+  - 项目链接: [NewsDev归档](http://ontitaner.github.io/blog/2015/07/27/Project_CSDN.html)
   
   - 项目进展: **主框架已搭建完毕 / 仿QQ侧滑菜单 / 支持下拉刷新，上划加载更多 / 实时抓取网络新闻内容,实现分页存储 / 异步加载图片**
 
