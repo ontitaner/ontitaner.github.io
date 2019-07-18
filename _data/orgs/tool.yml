@@ -1,0 +1,64 @@
+name: 工具
+icon: fa fa-wrench
+members:
+
+  - name: 常用API文档索引
+    link: http://tool.oschina.net/apidocs
+
+  - name: RGB颜色查询对照表
+    link: http://www.114la.com/other/rgb.htm
+
+  - name: 正则表达式测试
+    link: http://tool.oschina.net/regex
+    
+  - name: 进制转换
+    link: http://tool.oschina.net/hexconvert
+    
+  - name: Json代码格式化
+    link: http://tool.oschina.net/codeformat/json
+    
+  - name: markdown编辑器
+    link: http://tool.oschina.net/markdown
+    
+  - name: markdown简明语法
+    link: http://ibruce.info/2013/11/26/markdown/
+    
+  - name: XML代码格式化
+    link: http://tool.oschina.net/codeformat/xml
+    
+  - name: 常用对照表
+    link: http://tool.oschina.net/commons
+    
+  - name: 无损图片压缩
+    link: https://tinypng.com/
+    
+  - name: 在线图片格式转换(导出ico/png)
+    link: http://lvwenhan.com/convertico/
+    
+  - name: API Store
+    link: http://apistore.baidu.com/
+    
+  - name: MarkDown Resume
+    link: http://cvbox.sinaapp.com/
+    
+  - name: Stack Overflow
+    link: http://stackoverflow.com/
+    
+  - name: Jekyll
+    link: http://jekyll.bootcss.com/
+    
+  - name: 二维码生成器
+    link: http://pro.wwei.cn/
+    
+  - name: C++新标准学习
+    link: http://cpp1x.org/compiler-support.html
+    
+  - name: google hosts
+    link: http://googlehost.lofter.com/
+    
+  - name: google mirror
+    link: http://www.itechzero.com/google-mirror-sites-collect.html
+    
+    
+
+ 

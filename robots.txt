@@ -1,0 +1,3 @@
+User-Agent: *
+
+Sitemap: http://smallkiss.github.io/sitemap.txt
