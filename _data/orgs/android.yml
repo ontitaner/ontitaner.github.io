@@ -1,9 +1,12 @@
 
-name: 安卓
-icon: fa fa-android
+name: 字体图标
+icon: fa fa-font
 members:    
   - name: EasyIcon
     link: http://www.easyicon.net/
+
+  - name: fontawesome
+    link: http://www.fontawesome.com.cn/
     
   
 
