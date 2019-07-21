@@ -5,14 +5,11 @@ members:
   - name: 常用API文档索引
     link: http://tool.oschina.net/apidocs
 
-  - name: 正则表达式测试
-    link: http://tool.oschina.net/regex
-    
-  - name: 进制转换
-    link: http://tool.oschina.net/hexconvert
+  - name: pdf在线神器
+    link: https://smallpdf.com/
     
   - name: Json代码格式化
-    link: http://tool.oschina.net/codeformat/json
+    link: http://www.bejson.com/jsoneditoronline/
     
   - name: XML代码格式化
     link: http://tool.oschina.net/codeformat/xml
