@@ -1,3 +1,3 @@
 User-Agent: *
 
-Sitemap: http://smallkiss.github.io/sitemap.txt
+Sitemap: http://ontitaner.github.io/sitemap.txt
