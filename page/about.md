@@ -106,7 +106,5 @@ blockquote p {
   - 项目链接: [NewsDev归档](http://ontitaner.github.io/blog/2015/07/27/Project_NewsDev.html)
   
   - 项目进展: **主框架已搭建完毕 / 仿QQ侧滑菜单 / 支持下拉刷新，上划加载更多 / 实时抓取网络新闻内容,实现分页存储 / 异步加载图片**
-
-![NewsDev](/res/img/blog/2015/07/27/NewsDev.png)
 		
 ---
