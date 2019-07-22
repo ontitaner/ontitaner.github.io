@@ -11,16 +11,6 @@ shTheme: shThemeMidnight # shThemeDefault  shThemeDjango  shThemeEclipse  shThem
 
 VS编译生成pyd扩展模块
 
-**注意**  
-
-* 项目依赖中将python安装路径下include目录包含进去，其中包含Cpython需要使用的头文件，例如Python.h
-
-* 连接器配置项中附加库目录将python安装路径下libs目录包含进去，其中有需要用到的lib文件;“输入”项中将python.lib添加进去
-
-* 输出文件设置为“模块名.pyd”格式;
-
-* 确保编译器最后生成的是realease版本
-
 <!-- more -->
 
 ---
@@ -74,3 +64,14 @@ VS编译生成pyd扩展模块
 		return PyModule_Create(&example_module);
 	}
 </pre>
+
+
+**注意**  
+
+* 项目依赖中将python安装路径下include目录包含进去，其中包含Cpython需要使用的头文件，例如Python.h
+
+* 连接器配置项中附加库目录将python安装路径下libs目录包含进去，其中有需要用到的lib文件;“输入”项中将python.lib添加进去
+
+* 输出文件设置为“模块名.pyd”格式;
+
+* 确保编译器最后生成的是realease版本
