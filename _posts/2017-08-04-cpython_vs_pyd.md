@@ -1,6 +1,6 @@
 ---
 layout : post
-title : "CPython扩展模块生成.pyd"
+title : "CPython扩展模块生成pyd"
 category : CPython
 duoshuo: true
 date : 2017-08-04
@@ -12,7 +12,6 @@ shTheme: shThemeMidnight # shThemeDefault  shThemeDjango  shThemeEclipse  shThem
 
 **VS编译生成pyd扩展模块**
 
-使用VS编译生成.pyd扩展模块，供python调用。
 
 注意几点：
 
