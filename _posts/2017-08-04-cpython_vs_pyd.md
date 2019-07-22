@@ -9,17 +9,18 @@ SyntaxHihglighter: true
 shTheme: shThemeMidnight # shThemeDefault  shThemeDjango  shThemeEclipse  shThemeEmacs  shThemeFadeToGrey  shThemeMidnight  shThemeRDark
 ---
 
+**VS编译生成.pyd扩展模块**
 使用VS编译生成.pyd扩展模块，供python调用。
 
 注意几点：
 
-（1）项目依赖中将python安装路径下include目录包含进去，其中包含Cpython需要使用的头文件，例如Python.h
+* 项目依赖中将python安装路径下include目录包含进去，其中包含Cpython需要使用的头文件，例如Python.h
 
-（2）连接器配置项中附加库目录将python安装路径下libs目录包含进去，其中有需要用到的lib文件;“输入”项中将python.lib添加进去
+* 连接器配置项中附加库目录将python安装路径下libs目录包含进去，其中有需要用到的lib文件;“输入”项中将python.lib添加进去
 
-（3）输出文件设置为“模块名.pyd”格式;
+* 输出文件设置为“模块名.pyd”格式;
 
-（4）确保编译器最后生成的是realease版本
+* 确保编译器最后生成的是realease版本
 
 编译执行后，生成.pyd文件，可放置到python site_package下尝试运行
 
