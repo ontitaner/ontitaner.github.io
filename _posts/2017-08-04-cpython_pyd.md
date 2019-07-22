@@ -49,12 +49,12 @@ static PyMethodDef example_methods[] =
 };
 
 static struct PyModuleDef example_module = {
-PyModuleDef_HEAD_INIT,
-"example",   /* name of module */
-NULL, /* module documentation, may be NULL */
--1,       /* size of per-interpreter state of the module,
-or -1 if the module keeps state in global variables. */
-example_methods
+    PyModuleDef_HEAD_INIT,
+    "example",   /* name of module */
+    NULL, /* module documentation, may be NULL */
+    -1,       /* size of per-interpreter state of the module,
+              or -1 if the module keeps state in global variables. */
+    example_methods
 };
 
 PyMODINIT_FUNC
