@@ -1,8 +1,8 @@
 ---
 layout : post
-title : "CPython扩展生成.pyd文件"
+title : "CPython扩展模块生成.pyd"
 category : CPython
-duoshuo: false
+duoshuo: true
 date : 2017-08-04
 tags : [CPython]
 SyntaxHihglighter: true
