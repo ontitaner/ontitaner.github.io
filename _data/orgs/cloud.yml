@@ -2,8 +2,8 @@
 name: 云
 icon: fa fa-cloud-download
 members:
-  - name: github
-    link: https://github.com/
+  - name: gitbook
+    link: https://www.gitbook.com/
 
   - name: OSC
     link: http://git.oschina.net/
