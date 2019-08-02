@@ -5,9 +5,9 @@ members:
   - name: gitbook
     link: https://www.gitbook.com/
 
-  - name: OSC
-    link: http://git.oschina.net/
+  - name: C++11
+    link: https://www.bogotobogo.com/cplusplus/C11/
 
-  - name: gitcafe
-    link: https://gitcafe.com/
+  - name: 在线阅读
+    link: https://legacy.gitbook.com/@chenxiaowei
 
