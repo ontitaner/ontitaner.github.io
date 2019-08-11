@@ -3,7 +3,7 @@ layout : post
 title : "C的printf参数传递误区"
 category : C
 duoshuo: true
-date : 2014-12-01
+date : 2012-12-01
 tags : [C , printf , 参数传递 ]
 SyntaxHihglighter: true
 shTheme: shThemeMidnight # shThemeDefault  shThemeDjango  shThemeEclipse  shThemeEmacs  shThemeFadeToGrey  shThemeMidnight  shThemeRDark

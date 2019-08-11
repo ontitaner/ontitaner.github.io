@@ -2,6 +2,9 @@
 name: 工程师
 icon: fa fa-code
 members:
+  - name: 工程师辅助
+    link: https://tool.lu/index.html
+    
   - name: gitbook
     link: https://www.gitbook.com/
 

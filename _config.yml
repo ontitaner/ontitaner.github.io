@@ -18,12 +18,12 @@ shTheme: shThemeDefault # shThemeDefault  shThemeDjango  shThemeEclipse  shTheme
 #SyntaxHihglighter config end
 
 blog:
-    name: ontitaner                                      # 博客名称
+    name: の                                             # 博客名称
     description: Sharp your mind.                        # 博客描述
     title: Coding yourself                               # 网页标题
     url: https://ontitaner.github.io/                    # 博客地址
 author:
-    name: ontitaner                                      # 作者名称
+    name: の                                             # 作者名称
     email: ontitan.esc@gmail.com                         # 邮箱地址
     weibo: https://weibo.com/6338434038/profile          # 微博地址
     github: https://github.com/ontitaner                 # GitHub地址

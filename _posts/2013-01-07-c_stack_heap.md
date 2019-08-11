@@ -3,7 +3,7 @@ layout : post
 title : "C中关于堆栈的总结"
 category : C
 duoshuo: true
-date : 2015-01-07
+date : 2013-01-07
 tags : [C ]
 SyntaxHihglighter: true
 shTheme: shThemeMidnight # shThemeDefault  shThemeDjango  shThemeEclipse  shThemeEmacs  shThemeFadeToGrey  shThemeMidnight  shThemeRDark

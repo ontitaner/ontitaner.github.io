@@ -3,7 +3,7 @@ layout : post
 title : "C程序的优化"
 category : C
 duoshuo: true
-date : 2015-01-11
+date : 2013-01-11
 tags : [C ]
 SyntaxHihglighter: true
 shTheme: shThemeMidnight # shThemeDefault  shThemeDjango  shThemeEclipse  shThemeEmacs  shThemeFadeToGrey  shThemeMidnight  shThemeRDark

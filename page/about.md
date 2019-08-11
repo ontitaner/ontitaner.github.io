@@ -29,7 +29,7 @@ blockquote p {
 
 
 
-* 昵&nbsp;称&nbsp;: **ontitaner**  
+* 昵&nbsp;称&nbsp;: **の**  
    
 * Email: <a href="mailto:ontitan.esc@gmail.com">ontitan.esc@gmail.com</a><br />
 
@@ -71,7 +71,7 @@ blockquote p {
 
 ---
 
-# 个人项目  
+# 个人项目（学生期间）  
 
 * **NewsDev**
 

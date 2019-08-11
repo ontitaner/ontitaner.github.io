@@ -3,7 +3,7 @@ layout : post
 title : "C的内存的动态分配与释放相关总结"
 category : C
 duoshuo: true
-date : 2015-03-02
+date : 2013-03-02
 tags : [C ]
 SyntaxHihglighter: true
 shTheme: shThemeMidnight # shThemeDefault  shThemeDjango  shThemeEclipse  shThemeEmacs  shThemeFadeToGrey  shThemeMidnight  shThemeRDark

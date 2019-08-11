@@ -3,7 +3,7 @@ layout : post
 title : "浮点数的舍入误差"
 category : C
 duoshuo: true
-date : 2015-01-01
+date : 2012-01-01
 tags : [C , 浮点数 ]
 SyntaxHihglighter: true
 shTheme: shThemeMidnight # shThemeDefault  shThemeDjango  shThemeEclipse  shThemeEmacs  shThemeFadeToGrey  shThemeMidnight  shThemeRDark
