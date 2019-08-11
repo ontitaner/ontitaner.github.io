@@ -21,8 +21,7 @@ C++11线程库线程传递参数
 <pre class="brush: c; ">
 
 #include&lt;iostream&gt;
-#include<iostream>
-#include<thread>
+#include&lt;thread&gt;
 
 using namespace std;
 
