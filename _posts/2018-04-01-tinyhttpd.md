@@ -11,9 +11,9 @@ shTheme: shThemeMidnight # shThemeDefault  shThemeDjango  shThemeEclipse  shThem
 
 Tinyhttpd轻量型服务器原理
 
-![Tinyhttpd原理](/res/img/blog/2018/04/01/tinyhttpd.png)
+![Tinyhttpd原理](/res/img/blog/2018/04/01/tinyhttpd.jpg)
 
-&lt;!-- more --&gt;
+<!-- more -->
 
 ---
 
