@@ -1,10 +1,10 @@
 ---
 layout : post
-title : "C程序的编译链接过程"
+title : "TinyHttpd源码理解"
 category : C
 duoshuo: true
-date : 2012-01-01
-tags : [C , 编译链接 ]
+date : 2018-04-01
+tags : [C]
 SyntaxHihglighter: true
 shTheme: shThemeMidnight # shThemeDefault  shThemeDjango  shThemeEclipse  shThemeEmacs  shThemeFadeToGrey  shThemeMidnight  shThemeRDark
 ---
