@@ -10,6 +10,7 @@ shTheme: shThemeMidnight # shThemeDefault  shThemeDjango  shThemeEclipse  shThem
 ---
 
 我的开发环境，主机是windows7，虚拟机是ubuntu16，VirtualBox5.2。
+
 今天发现不能再虚拟机中不能创建软连接，ln -s target link
 
 <!-- more -->
@@ -27,11 +28,17 @@ shTheme: shThemeMidnight # shThemeDefault  shThemeDjango  shThemeEclipse  shThem
 
 VBoxManage setextradata接下
 
-YOURVMNAME VBoxInternal2/SharedFoldersEnableSymlinksCreate/YOURSHAREFOLDERNAME 1
+YOURVMNAME VBoxInternal2/ 接下
+SharedFoldersEnableSymlinksCreate/ 接下
+YOURSHAREFOLDERNAME 1
 
-YOURVMNAME ：你虚拟机的名字（virtualbox左侧虚机列表，例如centos7）
+YOURVMNAME ：
 
-YOURSHAREFOLDERNAME ：共享文件夹的名字，不是地址
+你虚拟机的名字（virtualbox左侧虚机列表，例如centos7）
+
+YOURSHAREFOLDERNAME ：
+
+共享文件夹的名字，不是地址
 
 </pre>
 
@@ -49,7 +56,11 @@ VBoxManage getextradata centos7 enumerate
 
 Key:
 
-VBoxInternal2/SharedFoldersEnableSymlinksCreate/YOURSHAREFOLDERNAME,Value: 1
+VBoxInternal2/ 接下
+
+SharedFoldersEnableSymlinksCreate/接下
+
+YOURSHAREFOLDERNAME,Value: 1
 
 </pre>
 
