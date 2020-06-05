@@ -9,7 +9,8 @@ SyntaxHihglighter: true
 shTheme: shThemeMidnight # shThemeDefault  shThemeDjango  shThemeEclipse  shThemeEmacs  shThemeFadeToGrey  shThemeMidnight  shThemeRDark
 ---
 
-我的开发环境，主机是windows7，虚拟机是ubuntu16，VirtualBox5.2。今天发现不能再虚拟机中不能创建软连接，ln -s target link
+我的开发环境，主机是windows7，虚拟机是ubuntu16，VirtualBox5.2。
+今天发现不能再虚拟机中不能创建软连接，ln -s target link
 
 <!-- more -->
 
@@ -24,7 +25,8 @@ shTheme: shThemeMidnight # shThemeDefault  shThemeDjango  shThemeEclipse  shThem
 
 <pre class="brush: c; ">
 
-VBoxManage setextradata YOURVMNAME VBoxInternal2/SharedFoldersEnableSymlinksCreate/YOURSHAREFOLDERNAME 1  
+VBoxManage setextradata 
+YOURVMNAME VBoxInternal2/SharedFoldersEnableSymlinksCreate/YOURSHAREFOLDERNAME 1
 
 YOURVMNAME ：你虚拟机的名字（virtualbox左侧虚机列表，例如centos7）
 
@@ -40,19 +42,23 @@ VBoxManage getextradata YOURVMNAME enumerate
 
 eg：
 
-VBoxManage getextradata centos7 enumerate  
+VBoxManage getextradata centos7 enumerate
 
 结果中有类似，说明设置成功了
 
-Key:VBoxInternal2/SharedFoldersEnableSymlinksCreate/YOURSHAREFOLDERNAME,Value: 1
+Key:
+
+VBoxInternal2/SharedFoldersEnableSymlinksCreate/YOURSHAREFOLDERNAME,Value: 1
 
 </pre>
 
-* 如果你不知管理员用户，你可能还是不能创建软连接，还需要第三步在win7 下,run secpol.msc，打开的是本地安全策略
+* 如果你不知管理员用户，你可能还是不能创建软连接，还需要第三步在win7 下,
+run secpol.msc，打开的是本地安全策略
 
 <pre class="brush: c; ">
 
-本地安全策略-->本地策略-->用户权限分配-->创建符号链接-->添加用户或者组权限
+本地安全策略-->本地策略-->
+用户权限分配-->创建符号链接-->添加用户或者组权限
 
 </pre>
 
