@@ -25,7 +25,8 @@ shTheme: shThemeMidnight # shThemeDefault  shThemeDjango  shThemeEclipse  shThem
 
 <pre class="brush: c; ">
 
-VBoxManage setextradata 
+VBoxManage setextradata接下
+
 YOURVMNAME VBoxInternal2/SharedFoldersEnableSymlinksCreate/YOURSHAREFOLDERNAME 1
 
 YOURVMNAME ：你虚拟机的名字（virtualbox左侧虚机列表，例如centos7）
