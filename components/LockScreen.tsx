@@ -128,6 +128,25 @@ export default function LockScreen({ children }: Props) {
     }
   }, [mounted, unlocked]);
 
+  // Mobile keyboard: scroll input into view when virtual keyboard opens
+  useEffect(() => {
+    if (!mounted || unlocked) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const onResize = () => {
+      // When keyboard opens, visualViewport height shrinks
+      if (inputRef.current && document.activeElement === inputRef.current) {
+        requestAnimationFrame(() => {
+          inputRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        });
+      }
+    };
+
+    vv.addEventListener('resize', onResize);
+    return () => vv.removeEventListener('resize', onResize);
+  }, [mounted, unlocked]);
+
   const handleSubmit = useCallback(async () => {
     if (!password.trim()) {
       setError('请输入密码');
@@ -176,10 +195,15 @@ export default function LockScreen({ children }: Props) {
           <input
             ref={inputRef}
             type="password"
+            inputMode="text"
+            autoComplete="off"
             placeholder="••••••••"
             value={password}
             onChange={e => { setPassword(e.target.value); setError(''); }}
             onKeyDown={e => { if (e.key === 'Enter') handleSubmit(); }}
+            onFocus={() => {
+              setTimeout(() => inputRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 300);
+            }}
             className={error ? 'lock-input-error' : ''}
           />
         </div>

@@ -1628,6 +1628,7 @@ pre:hover .copy-btn { opacity: 1; }
   border-radius: 24px;
   padding: 52px 44px 40px;
   width: 400px;
+  max-width: calc(100vw - 32px);
   text-align: center;
   z-index: 1;
   animation: cardAppear 0.6s cubic-bezier(0.16, 1, 0.3, 1);
@@ -2131,6 +2132,35 @@ h3:hover .heading-anchor { opacity: 0.6; }
   .toc, .toc-toggle { display: none; }
 
   .search-modal { width: 95vw; }
+
+  /* Lock screen mobile fixes */
+  .lock-screen {
+    align-items: flex-start;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .lock-card {
+    padding: 36px 24px 28px;
+    margin: auto 16px;
+    width: auto;
+    max-width: 400px;
+  }
+
+  .lock-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    margin-bottom: 20px;
+  }
+
+  .lock-title { font-size: 1.4em; }
+  .lock-subtitle { margin-bottom: 24px; }
+
+  .lock-dos-hero { font-size: 20px; }
+  .lock-dos-number { font-size: 36px; }
+  .lock-dos-text { font-size: 14px; }
+  .lock-dos-bg { padding: 20px 24px; }
 }
 
 @media (max-width: 480px) {
@@ -2138,6 +2168,38 @@ h3:hover .heading-anchor { opacity: 0.6; }
   .panels-container { margin-left: 0; }
   .doc-scroll { padding: 16px 12px; }
   .doc-header h1 { font-size: 1.4em; }
+
+  .lock-card {
+    padding: 28px 18px 24px;
+    border-radius: 18px;
+  }
+
+  .lock-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    margin-bottom: 16px;
+  }
+
+  .lock-icon svg { width: 28px; height: 28px; }
+
+  .lock-title { font-size: 1.2em; }
+  .lock-subtitle { font-size: 13px; margin-bottom: 20px; }
+
+  .lock-input-wrap input {
+    padding: 12px 16px;
+    font-size: 16px;
+    border-radius: 12px;
+  }
+
+  .lock-btn {
+    padding: 12px;
+    font-size: 14px;
+    border-radius: 12px;
+  }
+
+  .lock-dos-hero { font-size: 16px; }
+  .lock-dos-number { font-size: 28px; }
 }
 
 /* ===== Home Stats ===== */
