@@ -121,10 +121,14 @@ export default function LockScreen({ children }: Props) {
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-focus input when lock screen shows
+  // Auto-focus input when lock screen shows (desktop only, mobile ignores programmatic focus)
   useEffect(() => {
     if (mounted && !unlocked) {
-      setTimeout(() => inputRef.current?.focus(), 600);
+      // Only auto-focus on non-touch devices; mobile requires user tap to open keyboard
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      if (!isTouch) {
+        setTimeout(() => inputRef.current?.focus(), 600);
+      }
     }
   }, [mounted, unlocked]);
 
@@ -195,8 +199,8 @@ export default function LockScreen({ children }: Props) {
           <input
             ref={inputRef}
             type="password"
-            inputMode="text"
-            autoComplete="off"
+            autoComplete="current-password"
+            enterKeyHint="go"
             placeholder="••••••••"
             value={password}
             onChange={e => { setPassword(e.target.value); setError(''); }}

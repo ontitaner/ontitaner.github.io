@@ -1,4 +1,5 @@
 import type { AppProps } from 'next/app';
+import Head from 'next/head';
 import LockScreen from '@/components/LockScreen';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import { SyncProvider } from '@/lib/SyncContext';
@@ -9,18 +10,23 @@ import '@/styles/globals.css';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <LockScreen>
-      <ThemeProvider>
-        <SyncProvider>
-          <AnnotationProvider>
-            <TagProvider>
-              <TabProvider>
-                <Component {...pageProps} />
-              </TabProvider>
-            </TagProvider>
-          </AnnotationProvider>
-        </SyncProvider>
-      </ThemeProvider>
-    </LockScreen>
+    <>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+      </Head>
+      <LockScreen>
+        <ThemeProvider>
+          <SyncProvider>
+            <AnnotationProvider>
+              <TagProvider>
+                <TabProvider>
+                  <Component {...pageProps} />
+                </TabProvider>
+              </TagProvider>
+            </AnnotationProvider>
+          </SyncProvider>
+        </ThemeProvider>
+      </LockScreen>
+    </>
   );
 }

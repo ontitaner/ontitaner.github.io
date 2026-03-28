@@ -1579,6 +1579,9 @@ pre:hover .copy-btn { opacity: 1; }
   justify-content: center;
   z-index: 9999;
   overflow: hidden;
+  /* Mobile: allow touch interaction with inputs */
+  -webkit-user-select: auto;
+  user-select: auto;
 }
 
 /* Animated grid background */
@@ -1647,6 +1650,7 @@ pre:hover .copy-btn { opacity: 1; }
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
+  pointer-events: none;
 }
 
 @keyframes borderGlow {
@@ -2124,20 +2128,64 @@ h3:hover .heading-anchor { opacity: 0.6; }
 
   .panels-container { margin-left: 56px; }
 
+  /* Disable split mode on mobile — single panel only */
   .panels-container.split .doc-panel { width: 100%; }
+  .panels-container.split .doc-panel:nth-child(2) { display: none; }
   .panel-divider { display: none; }
+  .tab-split-btn { display: none; }
 
   .doc-scroll { padding: 20px 16px 20px 24px; }
 
   .toc, .toc-toggle { display: none; }
 
-  .search-modal { width: 95vw; }
+  /* Search modal: full width, top-aligned for keyboard */
+  .search-overlay { padding-top: 5vh; }
+  .search-modal { width: 95vw; max-height: 70vh; }
+  .search-kbd { display: none; }
+
+  /* Tab bar: scrollable, smaller tabs */
+  .tab-bar { -webkit-overflow-scrolling: touch; }
+  .tab-item { padding: 0 10px; font-size: 12px; max-width: 140px; }
+  .tab-close { opacity: 1; }
+
+  /* Doc nav: stack vertically on narrow screens */
+  .doc-nav { flex-direction: column; }
+  .doc-nav-btn { max-width: 100%; }
+
+  /* Annotations: hide right-click based features, not usable on touch */
+  .anno-marker { display: none; }
+  .anno-ctx-menu { display: none; }
+
+  /* Heading anchors: always hidden on mobile (no hover) */
+  .heading-anchor { display: none; }
+
+  /* Code copy button: always visible on mobile (no hover) */
+  .copy-btn { opacity: 1; }
+
+  /* Home page adjustments */
+  .main-content { padding: 20px 16px; margin-left: 56px; }
+  .home-hero { padding: 30px 10px 20px; }
+  .home-hero h1 { font-size: 1.6em; }
+  .hero-features { flex-wrap: wrap; gap: 16px; }
+  .home-cards { padding: 0 8px; }
+
+  /* Export button: larger touch target */
+  .export-btn { padding: 8px; }
+
+  /* Mermaid: allow horizontal scroll */
+  .mermaid-wrapper { padding: 16px 12px; }
+
+  /* Tables: horizontal scroll */
+  .doc-content table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
   /* Lock screen mobile fixes */
   .lock-screen {
+    position: absolute;
     align-items: flex-start;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    padding: 10vh 0;
+    min-height: 100%;
   }
 
   .lock-card {
@@ -2145,6 +2193,7 @@ h3:hover .heading-anchor { opacity: 0.6; }
     margin: auto 16px;
     width: auto;
     max-width: 400px;
+    flex-shrink: 0;
   }
 
   .lock-icon {
@@ -2166,8 +2215,32 @@ h3:hover .heading-anchor { opacity: 0.6; }
 @media (max-width: 480px) {
   .sidebar { width: 0; border: none; }
   .panels-container { margin-left: 0; }
+  .main-content { margin-left: 0; padding: 16px 12px; }
   .doc-scroll { padding: 16px 12px; }
+  .doc-header { flex-direction: column; gap: 8px; }
   .doc-header h1 { font-size: 1.4em; }
+
+  /* Home page: single column cards */
+  .home-hero h1 { font-size: 1.3em; }
+  .home-hero p { font-size: 0.95em; }
+  .hero-stats { gap: 16px; }
+  .hero-stat-num { font-size: 22px; }
+  .home-cards { grid-template-columns: 1fr; }
+
+  /* Search modal: nearly full screen */
+  .search-overlay { padding-top: 2vh; }
+  .search-modal { width: 98vw; max-height: 80vh; border-radius: 8px; }
+  .search-header input { font-size: 16px; }
+
+  /* Tag pills: smaller */
+  .tag-pill { font-size: 11px; padding: 3px 8px; }
+  .tag-input-wrap input { font-size: 14px; }
+
+  /* Sync panel: full width */
+  .sync-panel { width: calc(100vw - 32px); left: auto; right: -8px; }
+
+  /* Tab context menu: not usable on touch */
+  .tab-ctx-overlay, .tab-ctx-menu { display: none; }
 
   .lock-card {
     padding: 28px 18px 24px;
