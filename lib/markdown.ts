@@ -16,7 +16,7 @@ export interface DocMeta {
   title: string;
   order?: number;
   date?: string;
-  icon?: string;
+  icon?: string | null;
 }
 
 export function getAllDocs(): DocMeta[] {
@@ -34,7 +34,7 @@ export function getAllDocs(): DocMeta[] {
         title: (data.title as string) || slug,
         order: (data.order as number) ?? 999,
         date: (data.date as string) || stat.mtime.toISOString().slice(0, 10),
-        icon: (data.icon as string) || undefined,
+        icon: (data.icon as string) || null,
       };
     })
     .sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
@@ -75,7 +75,7 @@ export async function getDocBySlug(slug: string) {
     slug,
     title: (data.title as string) || slug,
     date: (data.date as string) || stat.mtime.toISOString().slice(0, 10),
-    icon: (data.icon as string) || undefined,
+    icon: (data.icon as string) || null,
     htmlContent,
     mermaidBlocks,
   };

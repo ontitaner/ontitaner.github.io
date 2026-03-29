@@ -20,7 +20,7 @@ interface DocData {
   slug: string;
   title: string;
   date?: string;
-  icon?: string;
+  icon?: string | null;
   htmlContent: string;
   mermaidBlocks: string[];
 }
