@@ -2273,8 +2273,7 @@ h3:hover .heading-anchor { opacity: 0.6; }
   /* Mermaid: allow horizontal scroll */
   .mermaid-wrapper { padding: 16px 12px; }
 
-  /* Tables: horizontal scroll */
-  .doc-content table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  /* Tables: horizontal scroll — consolidated into the @AI_GENERATED block above */
 
   /* Lock screen mobile fixes */
   .lock-screen {
