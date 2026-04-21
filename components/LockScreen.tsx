@@ -142,7 +142,7 @@ export default function LockScreen({ children }: Props) {
       // When keyboard opens, visualViewport height shrinks
       if (inputRef.current && document.activeElement === inputRef.current) {
         requestAnimationFrame(() => {
-          inputRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          inputRef.current?.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' });
         });
       }
     };
@@ -206,7 +206,7 @@ export default function LockScreen({ children }: Props) {
             onChange={e => { setPassword(e.target.value); setError(''); }}
             onKeyDown={e => { if (e.key === 'Enter') handleSubmit(); }}
             onFocus={() => {
-              setTimeout(() => inputRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 300);
+              setTimeout(() => inputRef.current?.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' }), 300);
             }}
             className={error ? 'lock-input-error' : ''}
           />

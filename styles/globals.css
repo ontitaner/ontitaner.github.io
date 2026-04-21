@@ -2170,7 +2170,9 @@ h3:hover .heading-anchor { opacity: 0.6; }
   .panel-divider { display: none; }
   .tab-split-btn { display: none; }
 
-  .doc-scroll { padding: 20px 16px 20px 16px; }
+  .doc-scroll { padding: 20px 16px 20px 16px; overflow-x: hidden; }
+  .doc-content { overflow-wrap: break-word; word-break: break-word; }
+  .doc-content pre { max-width: 100%; }
 
   .toc, .toc-toggle { display: none; }
 
@@ -2273,6 +2275,7 @@ h3:hover .heading-anchor { opacity: 0.6; }
   .lock-screen {
     position: absolute;
     align-items: flex-start;
+    overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding: 10vh 0;
@@ -2281,10 +2284,11 @@ h3:hover .heading-anchor { opacity: 0.6; }
 
   .lock-card {
     padding: 36px 24px 28px;
-    margin: auto 16px;
-    width: auto;
+    margin: 0 auto;
+    width: calc(100% - 32px);
     max-width: 400px;
     flex-shrink: 0;
+    align-self: center;
   }
 
   .lock-icon {
@@ -2331,7 +2335,7 @@ h3:hover .heading-anchor { opacity: 0.6; }
   .panels-container { margin-left: 0; }
   .main-content { margin-left: 0; padding: 16px 12px; }
   /* @AI_GENERATED: end */
-  .doc-scroll { padding: 16px 12px; }
+  .doc-scroll { padding: 16px 12px; overflow-x: hidden; }
   .doc-header { flex-direction: column; gap: 8px; }
   .doc-header h1 { font-size: 1.4em; }
 
