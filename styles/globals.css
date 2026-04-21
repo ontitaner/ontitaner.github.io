@@ -32,7 +32,9 @@ a { color: var(--accent); text-decoration: none; }
 a:hover { color: var(--accent-hover); }
 
 /* ===== Layout ===== */
-.layout { display: flex; height: 100vh; }
+/* @AI_GENERATED */
+.layout { display: flex; height: 100vh; height: 100dvh; }
+/* @AI_GENERATED: end */
 
 /* ===== Sidebar ===== */
 .sidebar {
@@ -267,12 +269,15 @@ a:hover { color: var(--accent-hover); }
 }
 
 /* ===== Panels ===== */
+/* @AI_GENERATED */
 .panels-container {
   margin-left: var(--sidebar-width);
   flex: 1;
   display: flex;
   height: 100vh;
+  height: 100dvh;
 }
+/* @AI_GENERATED: end */
 
 .panels-container.split .doc-panel { width: 50%; }
 
@@ -2100,33 +2105,64 @@ h3:hover .heading-anchor { opacity: 0.6; }
 }
 
 /* ===== Mobile Responsive ===== */
+
+/* @AI_GENERATED — hamburger button */
+.hamburger-btn {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 50;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hamburger-btn:active { background: var(--bg-hover); }
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+/* @AI_GENERATED: end */
+
 @media (max-width: 768px) {
+  /* @AI_GENERATED — sidebar drawer mode */
   .sidebar {
-    width: 56px;
+    width: var(--sidebar-width);
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 100;
+  }
+  .sidebar.sidebar-drawer-open {
+    transform: translateX(0);
   }
 
-  .sidebar .brand-text,
-  .sidebar .brand-actions,
-  .sidebar .sidebar-filter,
-  .sidebar .sidebar-tag-bar,
-  .sidebar .nav-text,
-  .sidebar .nav-dot,
-  .sidebar .nav-group-header .nav-group-name,
-  .sidebar .nav-group-header .nav-group-count,
-  .sidebar .nav-group-icon,
   .sidebar .sidebar-collapse-btn { display: none; }
+  /* @AI_GENERATED: end */
 
   .sidebar .sidebar-brand {
-    justify-content: center;
-    padding: 16px 8px;
+    padding: 16px 12px;
   }
 
   .sidebar .nav-link {
-    justify-content: center;
-    padding: 10px;
+    padding: 10px 12px 10px 20px;
   }
 
-  .panels-container { margin-left: 56px; }
+  /* @AI_GENERATED */
+  .panels-container { margin-left: 0; }
+  .tab-bar { padding-left: 52px; }
+  .main-content { padding-top: 56px; }
+  /* @AI_GENERATED: end */
 
   /* Disable split mode on mobile — single panel only */
   .panels-container.split .doc-panel { width: 100%; }
@@ -2134,9 +2170,61 @@ h3:hover .heading-anchor { opacity: 0.6; }
   .panel-divider { display: none; }
   .tab-split-btn { display: none; }
 
-  .doc-scroll { padding: 20px 16px 20px 24px; }
+  .doc-scroll { padding: 20px 16px 20px 16px; }
 
   .toc, .toc-toggle { display: none; }
+
+  /* @AI_GENERATED — mobile TOC bottom sheet styles */
+  .toc-mobile-trigger {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+  }
+  .toc-mobile-trigger:active { background: var(--bg-hover); }
+
+  .toc-bottom-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 60vh;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+    z-index: 200;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 16px 24px;
+    animation: tocSlideUp 0.25s ease;
+  }
+  .toc-bottom-sheet .toc-header { padding: 8px 0; }
+  .toc-bottom-sheet .toc-item { padding: 10px 8px; min-height: 44px; display: flex; align-items: center; }
+
+  .toc-sheet-handle {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    margin: 4px auto 8px;
+  }
+
+  @keyframes tocSlideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  /* @AI_GENERATED: end */
 
   /* Search modal: full width, top-aligned for keyboard */
   .search-overlay { padding-top: 5vh; }
@@ -2152,9 +2240,12 @@ h3:hover .heading-anchor { opacity: 0.6; }
   .doc-nav { flex-direction: column; }
   .doc-nav-btn { max-width: 100%; }
 
-  /* Annotations: hide right-click based features, not usable on touch */
-  .anno-marker { display: none; }
-  .anno-ctx-menu { display: none; }
+  /* @AI_GENERATED — annotations now work on mobile via long-press */
+  .anno-marker { right: -4px; }
+  .anno-pin { width: 36px; height: 36px; }
+  .anno-btn { padding: 10px; }
+  .anno-card { right: 0; left: auto; min-width: 200px; max-width: calc(100vw - 48px); }
+  /* @AI_GENERATED: end */
 
   /* Heading anchors: always hidden on mobile (no hover) */
   .heading-anchor { display: none; }
@@ -2163,7 +2254,7 @@ h3:hover .heading-anchor { opacity: 0.6; }
   .copy-btn { opacity: 1; }
 
   /* Home page adjustments */
-  .main-content { padding: 20px 16px; margin-left: 56px; }
+  .main-content { padding: 20px 16px; margin-left: 0; }
   .home-hero { padding: 30px 10px 20px; }
   .home-hero h1 { font-size: 1.6em; }
   .hero-features { flex-wrap: wrap; gap: 16px; }
@@ -2210,12 +2301,36 @@ h3:hover .heading-anchor { opacity: 0.6; }
   .lock-dos-number { font-size: 36px; }
   .lock-dos-text { font-size: 14px; }
   .lock-dos-bg { padding: 20px 24px; }
+
+  /* @AI_GENERATED — Phase 4: touch target sizing */
+  .brand-btn { min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
+  .theme-toggle { min-width: 44px; min-height: 44px; }
+  .sync-btn { min-width: 44px; min-height: 44px; }
+  .nav-link { min-height: 44px; }
+  .nav-group-header { min-height: 44px; }
+  .stag { min-height: 36px; padding: 6px 14px; }
+  .scroll-top-btn { width: 48px; height: 48px; }
+  .copy-btn { min-width: 44px; min-height: 44px; }
+  .export-btn { min-width: 44px; min-height: 44px; }
+  .doc-nav-btn { padding: 16px; }
+  .search-result { padding: 12px; min-height: 48px; }
+  .home-card { min-height: 52px; padding: 14px 16px; }
+  /* @AI_GENERATED: end */
 }
 
+/* @AI_GENERATED — touch device specific rules */
+@media (hover: none) and (pointer: coarse) {
+  .copy-btn { opacity: 1; }
+  .tab-close { opacity: 1; }
+  .heading-anchor { display: none; }
+}
+/* @AI_GENERATED: end */
+
 @media (max-width: 480px) {
-  .sidebar { width: 0; border: none; }
+  /* @AI_GENERATED — sidebar handled by drawer in Phase 2, no width:0 needed */
   .panels-container { margin-left: 0; }
   .main-content { margin-left: 0; padding: 16px 12px; }
+  /* @AI_GENERATED: end */
   .doc-scroll { padding: 16px 12px; }
   .doc-header { flex-direction: column; gap: 8px; }
   .doc-header h1 { font-size: 1.4em; }
@@ -2239,8 +2354,9 @@ h3:hover .heading-anchor { opacity: 0.6; }
   /* Sync panel: full width */
   .sync-panel { width: calc(100vw - 32px); left: auto; right: -8px; }
 
-  /* Tab context menu: not usable on touch */
-  .tab-ctx-overlay, .tab-ctx-menu { display: none; }
+  /* @AI_GENERATED — tab context menu now works on mobile with clamped positioning */
+  .tab-item { height: 44px; }
+  /* @AI_GENERATED: end */
 
   .lock-card {
     padding: 28px 18px 24px;

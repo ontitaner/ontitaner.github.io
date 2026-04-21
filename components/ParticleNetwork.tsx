@@ -20,10 +20,14 @@ export default function ParticleNetwork() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // @AI_GENERATED — mobile detection and reduced params
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    const PARTICLE_COUNT = isMobile ? 40 : 150;
+    const CONNECT_DIST = isMobile ? 80 : 140;
+    // @AI_GENERATED: end
+
     let animId: number;
     let particles: Particle[] = [];
-    const PARTICLE_COUNT = 150;
-    const CONNECT_DIST = 140;
     const MOUSE = { x: -1000, y: -1000 };
 
     const resize = () => {
@@ -48,7 +52,11 @@ export default function ParticleNetwork() {
     }
 
     const handleMouse = (e: MouseEvent) => { MOUSE.x = e.clientX; MOUSE.y = e.clientY; };
-    window.addEventListener('mousemove', handleMouse);
+    // @AI_GENERATED — skip mouse interaction on mobile
+    if (!isMobile) {
+      window.addEventListener('mousemove', handleMouse);
+    }
+    // @AI_GENERATED: end
 
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -124,7 +132,11 @@ export default function ParticleNetwork() {
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', resize);
-      window.removeEventListener('mousemove', handleMouse);
+      // @AI_GENERATED
+      if (!isMobile) {
+        window.removeEventListener('mousemove', handleMouse);
+      }
+      // @AI_GENERATED: end
     };
   }, []);
 

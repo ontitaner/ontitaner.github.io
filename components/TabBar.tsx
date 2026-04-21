@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTabContext } from '@/lib/TabContext';
+import { useIsMobile } from '@/lib/useIsMobile';
 import { IconX, IconSplitRight, IconSplitLeft, IconDoc } from './Icons';
 
 interface TabBarProps {
@@ -8,6 +9,7 @@ interface TabBarProps {
 
 export default function TabBar({ panel }: TabBarProps) {
   const { tabs, activeLeft, activeRight, closeTab, setActive, moveToPanel, splitMode } = useTabContext();
+  const isMobile = useIsMobile();
   const panelTabs = tabs.filter(t => t.panel === panel);
   const activeSlug = panel === 'left' ? activeLeft : activeRight;
   const otherPanel = panel === 'left' ? 'right' : 'left';
@@ -15,7 +17,11 @@ export default function TabBar({ panel }: TabBarProps) {
 
   const handleCtx = (e: React.MouseEvent, slug: string) => {
     e.preventDefault();
-    setCtxMenu({ x: e.clientX, y: e.clientY, slug });
+    // @AI_GENERATED — clamp menu position to viewport
+    const x = Math.min(e.clientX, window.innerWidth - 160);
+    const y = Math.min(e.clientY, window.innerHeight - 200);
+    setCtxMenu({ x, y, slug });
+    // @AI_GENERATED: end
   };
 
   const closeOthers = (slug: string) => {
@@ -45,7 +51,7 @@ export default function TabBar({ panel }: TabBarProps) {
             className={`tab-item ${tab.slug === activeSlug ? 'tab-active' : ''}`}
             onClick={() => setActive(tab.slug, panel)}
             onContextMenu={e => handleCtx(e, tab.slug)}
-            draggable
+            draggable={!isMobile}
             onDragStart={e => e.dataTransfer.setData('text/plain', tab.slug)}
           >
             <span className="tab-icon"><IconDoc size={13} /></span>

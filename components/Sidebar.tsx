@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTabContext } from '@/lib/TabContext';
 import { useTagContext } from '@/lib/TagContext';
+import { useIsMobile } from '@/lib/useIsMobile';
 import { DocMeta } from '@/lib/markdown';
 import { IconBolt, IconSearch, IconX, IconDoc, IconChevron, IconFolder, IconTag, IconHome } from './Icons';
 import SyncButton from './SyncButton';
@@ -10,10 +11,19 @@ import siteConfig from '@/site.config';
 export default function Sidebar({ docs, onSearchOpen }: { docs: DocMeta[]; onSearchOpen?: () => void }) {
   const { openTab, activeLeft, activeRight, tabs } = useTabContext();
   const { getTags, allTags, docsByTag, removeTagGlobal } = useTagContext();
+  const isMobile = useIsMobile();
   const [search, setSearch] = useState('');
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [mini, setMini] = useState(false);
+  // @AI_GENERATED
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Close drawer when switching to desktop
+  useEffect(() => {
+    if (!isMobile) setDrawerOpen(false);
+  }, [isMobile]);
+  // @AI_GENERATED: end
 
   // Sync mini state to body for CSS
   const toggleMini = () => {
@@ -62,12 +72,19 @@ export default function Sidebar({ docs, onSearchOpen }: { docs: DocMeta[]; onSea
     setCollapsed(prev => ({ ...prev, [tag]: !prev[tag] }));
   };
 
+  // @AI_GENERATED
+  const handleNavClick = (slug: string, title: string) => {
+    openTab(slug, title);
+    if (isMobile) setDrawerOpen(false);
+  };
+  // @AI_GENERATED: end
+
   const renderItem = (doc: DocMeta) => (
     <li key={doc.slug} className="nav-item">
       <a
         href="#"
         className={`nav-link ${isActive(doc.slug) ? 'nav-active' : ''} ${isOpen(doc.slug) ? 'nav-open' : ''}`}
-        onClick={e => { e.preventDefault(); openTab(doc.slug, doc.title); }}
+        onClick={e => { e.preventDefault(); handleNavClick(doc.slug, doc.title); }}
       >
         <span className="nav-icon"><IconDoc size={15} /></span>
         <span className="nav-text">{doc.title}</span>
@@ -77,11 +94,31 @@ export default function Sidebar({ docs, onSearchOpen }: { docs: DocMeta[]; onSea
   );
 
   return (
-    <nav className={`sidebar ${mini ? 'sidebar-mini' : ''}`}>
+    <>
+      {/* @AI_GENERATED — hamburger button for mobile */}
+      {isMobile && (
+        <button
+          className="hamburger-btn"
+          onClick={() => setDrawerOpen(prev => !prev)}
+          aria-label={drawerOpen ? '关闭菜单' : '打开菜单'}
+        >
+          {drawerOpen ? <IconX size={18} /> : (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          )}
+        </button>
+      )}
+      {isMobile && drawerOpen && (
+        <div className="sidebar-backdrop" onClick={() => setDrawerOpen(false)} />
+      )}
+      {/* @AI_GENERATED: end */}
+
+    <nav className={`sidebar ${mini && !isMobile ? 'sidebar-mini' : ''} ${isMobile && drawerOpen ? 'sidebar-drawer-open' : ''}`}>
       <div className="sidebar-brand">
         <div className="brand-icon" onClick={() => window.dispatchEvent(new Event('lock-screen'))} style={{ cursor: 'pointer' }} title="锁定"><IconBolt size={16} /></div>
-        {!mini && <span className="brand-text">{siteConfig.title}</span>}
-        {!mini && (
+        {(!mini || isMobile) && <span className="brand-text">{siteConfig.title}</span>}
+        {(!mini || isMobile) && (
           <div className="brand-actions">
             <button className="brand-btn" onClick={onSearchOpen} title="搜索 Ctrl+K"><IconSearch size={15} /></button>
             <ThemeToggle />
@@ -90,7 +127,7 @@ export default function Sidebar({ docs, onSearchOpen }: { docs: DocMeta[]; onSea
         )}
       </div>
 
-      {!mini && (
+      {(!mini || isMobile) && (
         <>
           <div className="sidebar-filter">
             <input
@@ -134,14 +171,14 @@ export default function Sidebar({ docs, onSearchOpen }: { docs: DocMeta[]; onSea
       )}
 
       <div className="sidebar-nav">
-        {mini ? (
+        {(mini && !isMobile) ? (
           <ul className="nav-list">
             {docs.map(doc => (
               <li key={doc.slug} className="nav-item">
                 <a
                   href="#"
                   className={`nav-link ${isActive(doc.slug) ? 'nav-active' : ''}`}
-                  onClick={e => { e.preventDefault(); openTab(doc.slug, doc.title); }}
+                  onClick={e => { e.preventDefault(); handleNavClick(doc.slug, doc.title); }}
                   title={doc.title}
                 >
                   <span className="nav-icon"><IconDoc size={15} /></span>
@@ -186,9 +223,14 @@ export default function Sidebar({ docs, onSearchOpen }: { docs: DocMeta[]; onSea
         )}
       </div>
 
-      <button className="sidebar-collapse-btn" onClick={toggleMini} title={mini ? '展开侧边栏' : '收起侧边栏'}>
-        <IconChevron size={14} open={!mini} />
-      </button>
+      {/* @AI_GENERATED — hide collapse btn on mobile */}
+      {!isMobile && (
+        <button className="sidebar-collapse-btn" onClick={toggleMini} title={mini ? '展开侧边栏' : '收起侧边栏'}>
+          <IconChevron size={14} open={!mini} />
+        </button>
+      )}
+      {/* @AI_GENERATED: end */}
     </nav>
+    </>
   );
 }

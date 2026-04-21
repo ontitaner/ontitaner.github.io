@@ -1,4 +1,5 @@
 import { useState, useEffect, RefObject } from 'react';
+import { useIsMobile } from '@/lib/useIsMobile';
 
 interface TocItem { id: string; text: string; level: number; }
 
@@ -16,6 +17,10 @@ export default function TableOfContents({ scrollRef, slug }: { scrollRef: RefObj
   const [items, setItems] = useState<TocItem[]>([]);
   const [activeId, setActiveId] = useState('');
   const [expanded, setExpanded] = useState(false);
+  const isMobile = useIsMobile();
+  // @AI_GENERATED — bottom sheet state for mobile
+  const [sheetOpen, setSheetOpen] = useState(false);
+  // @AI_GENERATED: end
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -62,7 +67,41 @@ export default function TableOfContents({ scrollRef, slug }: { scrollRef: RefObj
     const headingRect = heading.getBoundingClientRect();
     const offset = headingRect.top - containerRect.top + el.scrollTop - 20;
     el.scrollTo({ top: offset, behavior: 'smooth' });
+    if (isMobile) setSheetOpen(false);
   };
+
+  // @AI_GENERATED — mobile: FAB + bottom sheet
+  if (isMobile) {
+    return (
+      <>
+        <button className="toc-mobile-trigger" onClick={() => setSheetOpen(true)} aria-label="目录">
+          <IconList size={20} />
+        </button>
+        {sheetOpen && (
+          <>
+            <div className="sidebar-backdrop" onClick={() => setSheetOpen(false)} />
+            <div className="toc-bottom-sheet">
+              <div className="toc-sheet-handle" />
+              <div className="toc-header">
+                <span className="toc-title">目录</span>
+                <button className="toc-close" onClick={() => setSheetOpen(false)}>×</button>
+              </div>
+              {items.map(item => (
+                <a
+                  key={item.id}
+                  className={`toc-item ${item.level === 3 ? 'toc-sub' : ''} ${activeId === item.id ? 'toc-active' : ''}`}
+                  onClick={() => scrollTo(item.id)}
+                >
+                  {item.text}
+                </a>
+              ))}
+            </div>
+          </>
+        )}
+      </>
+    );
+  }
+  // @AI_GENERATED: end
 
   if (!expanded) {
     return (

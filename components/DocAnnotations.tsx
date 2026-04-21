@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAnnotations, Annotation } from '@/lib/AnnotationContext';
+import { useIsMobile } from '@/lib/useIsMobile';
 import { IconAnnotation, IconTrash } from './Icons';
 
 function IconEdit({ size = 13 }: { size?: number }) {
@@ -20,6 +21,7 @@ interface Props {
 export default function DocAnnotations({ slug, scrollRef }: Props) {
   const { getAnnotations, addAnnotation, removeAnnotation, updateAnnotation } = useAnnotations();
   const annotations = getAnnotations(slug);
+  const isMobile = useIsMobile();
 
   const [menu, setMenu] = useState<{ x: number; y: number; posY: number } | null>(null);
   const [newEditor, setNewEditor] = useState<{ posY: number } | null>(null);
@@ -31,8 +33,12 @@ export default function DocAnnotations({ slug, scrollRef }: Props) {
   const [editText, setEditText] = useState('');
   const newRef = useRef<HTMLTextAreaElement>(null);
   const editRef = useRef<HTMLTextAreaElement>(null);
+  // @AI_GENERATED — long-press refs for mobile
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  // @AI_GENERATED: end
 
-  // Right-click
+  // Right-click (desktop)
   const handleContextMenu = useCallback((e: MouseEvent) => {
     const el = scrollRef.current;
     if (!el) return;
@@ -47,9 +53,49 @@ export default function DocAnnotations({ slug, scrollRef }: Props) {
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    el.addEventListener('contextmenu', handleContextMenu);
-    return () => el.removeEventListener('contextmenu', handleContextMenu);
-  }, [scrollRef, handleContextMenu]);
+    // @AI_GENERATED — desktop: contextmenu, mobile: long-press
+    if (isMobile) {
+      const handleTouchStart = (e: TouchEvent) => {
+        const target = e.target as HTMLElement;
+        if (!target.closest('.doc-content')) return;
+        const touch = e.touches[0];
+        touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+        longPressTimer.current = setTimeout(() => {
+          const rect = el.getBoundingClientRect();
+          const posY = touch.clientY - rect.top + el.scrollTop;
+          setMenu({ x: touch.clientX - rect.left, y: posY, posY });
+        }, 500);
+      };
+      const handleTouchMove = (e: TouchEvent) => {
+        if (!longPressTimer.current) return;
+        const touch = e.touches[0];
+        const dx = touch.clientX - touchStartPos.current.x;
+        const dy = touch.clientY - touchStartPos.current.y;
+        if (Math.sqrt(dx * dx + dy * dy) > 10) {
+          clearTimeout(longPressTimer.current);
+          longPressTimer.current = null;
+        }
+      };
+      const handleTouchEnd = () => {
+        if (longPressTimer.current) {
+          clearTimeout(longPressTimer.current);
+          longPressTimer.current = null;
+        }
+      };
+      el.addEventListener('touchstart', handleTouchStart, { passive: true });
+      el.addEventListener('touchmove', handleTouchMove, { passive: true });
+      el.addEventListener('touchend', handleTouchEnd);
+      return () => {
+        el.removeEventListener('touchstart', handleTouchStart);
+        el.removeEventListener('touchmove', handleTouchMove);
+        el.removeEventListener('touchend', handleTouchEnd);
+      };
+    } else {
+      el.addEventListener('contextmenu', handleContextMenu);
+      return () => el.removeEventListener('contextmenu', handleContextMenu);
+    }
+    // @AI_GENERATED: end
+  }, [scrollRef, handleContextMenu, isMobile]);
 
   // Close menu on any click
   useEffect(() => {
