@@ -2172,9 +2172,9 @@ h3:hover .heading-anchor { opacity: 0.6; }
 
   /* @AI_GENERATED */
   .doc-scroll { padding: 20px 16px 20px 16px; }
-  .doc-content { overflow-wrap: break-word; word-break: break-word; max-width: 100%; }
-  .doc-content pre { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .doc-content table { display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .doc-content { overflow-wrap: break-word; word-break: break-word; max-width: 100%; overflow-x: hidden; }
+  .doc-content pre { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+  .doc-content table { display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
   /* @AI_GENERATED: end */
 
   .toc, .toc-toggle { display: none; }
@@ -2242,8 +2242,10 @@ h3:hover .heading-anchor { opacity: 0.6; }
   .tab-close { opacity: 1; }
 
   /* Doc nav: stack vertically on narrow screens */
-  .doc-nav { flex-direction: column; }
-  .doc-nav-btn { max-width: 100%; }
+  .doc-nav { flex-direction: column; gap: 10px; }
+  .doc-nav-btn { max-width: 100%; width: 100%; box-sizing: border-box; }
+  .doc-nav-btn.doc-nav-next .doc-nav-info { text-align: left; }
+  .doc-nav-title { white-space: normal; word-break: break-word; }
 
   /* @AI_GENERATED — annotations now work on mobile via long-press */
   .anno-marker { right: -4px; }
