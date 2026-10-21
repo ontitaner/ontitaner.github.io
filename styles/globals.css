@@ -273,6 +273,7 @@ a:hover { color: var(--accent-hover); }
 .panels-container {
   margin-left: var(--sidebar-width);
   flex: 1;
+  min-width: 0; /* @AI_GENERATED flex 链收缩约束必须逐层都有，缺这一环下游 doc-panel/doc-scroll 的 min-width:0 全部失效，宽内容仍撑破视口 */
   display: flex;
   height: 100vh;
   height: 100dvh;
