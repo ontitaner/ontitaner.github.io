@@ -18,7 +18,10 @@ This is a **Next.js 14 static-export docs site** deployed to GitHub Pages via `.
 
 ### Data flow
 
-- Docs are `.md` files in `/docs/`. `lib/markdown.ts` reads them at build time with `gray-matter` + `unified` (remark → rehype pipeline with syntax highlighting).
+- Docs live under `/public/collections/<collection>/`. One subdirectory = one collection. `lib/markdown.ts` recursively scans it at build time with `gray-matter` + `unified` (remark → rehype pipeline with syntax highlighting). The slug is the path relative to `collections` without `.md` (e.g. `ems-python-learning/00_导读`); the title is the filename; sidebar order is filename-ascending within a collection. Source `.md` need no frontmatter.
+- Images/attachments sit beside the `.md` inside the collection folder and are served from `/public`. Source markdown keeps relative links (`img/x.png`) so local-editor preview works; at build time `rewriteRelativeSrc` in `lib/markdown.ts` rewrites `<img src>` to the absolute `/collections/<dir>/...` path (the SPA injects HTML at URL `/`, so relatives would otherwise break). `.md` cross-links are left untouched — they work in a local editor, dead on the site.
+- A collection may add an optional `collection.json` (`{ "name", "order" }`) to set its display name and inter-collection order; absent, it falls back to the directory name and 999.
+- Adding a new collection = drop a folder into `/public/collections/`; no code or config change. `scripts/publish.mjs` (WeChat ZIP → `/docs`) is now an orphaned pipeline — the renderer only scans `/public/collections/`.
 - Mermaid diagrams are extracted before the remark pipeline, stored as `mermaidBlocks[]`, and re-injected client-side via `MERMAID_PLACEHOLDER_N` markers. The `Mermaid` component is dynamically imported (`ssr: false`).
 - `getStaticProps` in `pages/index.tsx` pre-builds all docs into `allDocs: Record<slug, DocData>` and passes them as props — no runtime file I/O.
 
@@ -48,15 +51,17 @@ This is a **Next.js 14 static-export docs site** deployed to GitHub Pages via `.
 
 `site.config.ts` — change `title` and `icon` here to rebrand the site.
 
-### Doc frontmatter
+### Collections (authoring convention)
 
-```yaml
----
-title: My Doc
-order: 1        # sidebar sort order (default 999)
-date: 2024-01-01
-icon: 🚀        # optional emoji shown in sidebar
----
+Source `.md` need no frontmatter — title = filename, sidebar order = filename-ascending within the collection. Use a sortable filename prefix (`00_`, `01_`, …) to control order. Files/dirs starting with `_` are not published.
+
+```
+public/collections/<collection>/
+├── 00_intro.md          # title "00_intro", shown first
+├── 01_foo.md
+├── img/…                # relative img/ links in the md resolve here on-site
+├── lab/ figures/…       # any other assets, published as downloadable files
+└── collection.json      # optional: { "name": "显示名", "order": 10 }
 ```
 
-Internal doc links use `./slug` or `./slug.md` syntax and are intercepted client-side to open as tabs instead of navigating.
+Internal `.md` cross-links are left as-is: they work in a local editor but are dead on the published site (by design — the site is a tab SPA, not per-doc URLs).

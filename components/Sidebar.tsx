@@ -53,20 +53,17 @@ export default function Sidebar({ docs, onSearchOpen }: { docs: DocMeta[]; onSea
     return list;
   }, [docs, search, activeTag, getTags, docsByTag]);
 
+  // @AI_GENERATED — 默认视图按集合（子目录）分组，而非用户标签
   const grouped = useMemo(() => {
     if (activeTag || search) return null;
     const map = new Map<string, DocMeta[]>();
-    const untagged: DocMeta[] = [];
     filtered.forEach(d => {
-      const userTags = getTags(d.slug);
-      if (userTags.length === 0) { untagged.push(d); return; }
-      userTags.forEach(t => {
-        if (!map.has(t)) map.set(t, []);
-        map.get(t)!.push(d);
-      });
+      if (!map.has(d.collection)) map.set(d.collection, []);
+      map.get(d.collection)!.push(d);
     });
-    return { map, untagged };
-  }, [filtered, activeTag, search, getTags]);
+    return map;
+  }, [filtered, activeTag, search]);
+  // @AI_GENERATED: end
 
   const toggleGroup = (tag: string) => {
     setCollapsed(prev => ({ ...prev, [tag]: !prev[tag] }));
@@ -190,30 +187,21 @@ export default function Sidebar({ docs, onSearchOpen }: { docs: DocMeta[]; onSea
           <>
         {(activeTag || search) ? (
           <ul className="nav-list">{filtered.map(renderItem)}</ul>
-        ) : grouped && grouped.map.size > 0 ? (
+        ) : grouped && grouped.size > 0 ? (
           <>
-            {Array.from(grouped.map.entries()).map(([tag, tagDocs]) => (
-              <div key={tag} className="nav-group">
-                <button className="nav-group-header" onClick={() => toggleGroup(tag)}>
-                  <IconChevron size={12} open={!collapsed[tag]} />
+            {/* @AI_GENERATED — 按集合分组渲染 */}
+            {Array.from(grouped.entries()).map(([collection, colDocs]) => (
+              <div key={collection} className="nav-group">
+                <button className="nav-group-header" onClick={() => toggleGroup(collection)}>
+                  <IconChevron size={12} open={!collapsed[collection]} />
                   <span className="nav-group-icon"><IconFolder size={13} /></span>
-                  <span className="nav-group-name">{tag}</span>
-                  <span className="nav-group-count">{tagDocs.length}</span>
+                  <span className="nav-group-name">{colDocs[0].collectionName}</span>
+                  <span className="nav-group-count">{colDocs.length}</span>
                 </button>
-                {!collapsed[tag] && <ul className="nav-list">{tagDocs.map(renderItem)}</ul>}
+                {!collapsed[collection] && <ul className="nav-list">{colDocs.map(renderItem)}</ul>}
               </div>
             ))}
-            {grouped.untagged.length > 0 && (
-              <div className="nav-group">
-                <button className="nav-group-header" onClick={() => toggleGroup('__untagged')}>
-                  <IconChevron size={12} open={!collapsed['__untagged']} />
-                  <span className="nav-group-icon"><IconFolder size={13} /></span>
-                  <span className="nav-group-name">未分类</span>
-                  <span className="nav-group-count">{grouped.untagged.length}</span>
-                </button>
-                {!collapsed['__untagged'] && <ul className="nav-list">{grouped.untagged.map(renderItem)}</ul>}
-              </div>
-            )}
+            {/* @AI_GENERATED: end */}
           </>
         ) : (
           <ul className="nav-list">{filtered.map(renderItem)}</ul>

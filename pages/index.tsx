@@ -27,6 +27,15 @@ export default function Home({ docs, allDocs }: HomeProps) {
   const hasOpenTabs = tabs.length > 0;
   const [searchOpen, setSearchOpen] = useState(false);
 
+  // @AI_GENERATED — 按集合聚合（docs 已排序，首次出现即首篇）
+  const collections = docs.reduce((acc, d) => {
+    let col = acc.find(c => c.collection === d.collection);
+    if (!col) { col = { collection: d.collection, name: d.collectionName, first: d, count: 0 }; acc.push(col); }
+    col.count++;
+    return acc;
+  }, [] as { collection: string; name: string; first: DocMeta; count: number }[]);
+  // @AI_GENERATED: end
+
   // Ctrl+K shortcut
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -60,18 +69,20 @@ export default function Home({ docs, allDocs }: HomeProps) {
                 <div className="hero-feat"><span className="hero-feat-icon"><IconTag size={18} /></span><span>标签归类</span></div>
               </div>
             </div>
+            {/* @AI_GENERATED — 首页列文章集合，点击打开该集合首篇 */}
             <div className="home-cards">
-              {docs.map(doc => (
-                <button key={doc.slug} className="home-card" onClick={() => openTab(doc.slug, doc.title)}>
+              {collections.map(col => (
+                <button key={col.collection} className="home-card" onClick={() => openTab(col.first.slug, col.first.title)}>
                   <span className="card-icon"><IconDoc size={20} /></span>
                   <div className="card-body">
-                    <span className="card-title">{doc.title}</span>
-                    {doc.date && <span className="card-date">{doc.date}</span>}
+                    <span className="card-title">{col.name}</span>
+                    <span className="card-date">{col.count} 篇</span>
                   </div>
                   <span className="card-arrow">→</span>
                 </button>
               ))}
             </div>
+            {/* @AI_GENERATED: end */}
           </div>
         ) : (
           <>
