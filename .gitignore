@@ -2,3 +2,6 @@ node_modules/
 .next/
 out/
 next-env.d.ts
+# @AI_GENERATED
+tsconfig.tsbuildinfo
+# @AI_GENERATED: end
