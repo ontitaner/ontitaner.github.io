@@ -1,4 +1,5 @@
 import { RefObject } from 'react';
+import siteConfig from '@/site.config';
 
 function IconDownload({ size = 14 }: { size?: number }) {
   const s = { display: 'inline-block', verticalAlign: 'middle', fill: 'none', stroke: 'currentColor' } as const;

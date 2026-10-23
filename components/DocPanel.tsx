@@ -11,6 +11,7 @@ import HeadingAnchors from './HeadingAnchors';
 import TableOfContents from './TableOfContents';
 import DocNav from './DocNav';
 import ExportPdf from './ExportPdf';
+import ReadingMode from './ReadingMode';
 import { useTabContext } from '@/lib/TabContext';
 import { DocMeta } from '@/lib/markdown';
 
@@ -114,6 +115,9 @@ export default function DocPanel({ panel, allDocs, docs, onOpenDoc }: DocPanelPr
                 <h1>{doc.title}</h1>
                 {doc.date && <span className="doc-date">{doc.date}</span>}
               </div>
+              {/* @AI_GENERATED */}
+              <ReadingMode />
+              {/* @AI_GENERATED: end */}
               <ExportPdf title={doc.title} scrollRef={scrollRef} />
             </div>
             <TagEditor slug={doc.slug} />
