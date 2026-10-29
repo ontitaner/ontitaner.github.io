@@ -1,0 +1,16 @@
+# @AI_GENERATED
+[project]
+name = "bess-soc-advanced-plus"
+version = "0.2.0"
+description = "储能 SOC/SOE/SOP 进阶课程（优化版，22 章）配套代码（纯标准库，无运行期第三方依赖）"
+requires-python = ">=3.9"
+dependencies = []   # 运行教学代码无需任何第三方库
+
+[project.optional-dependencies]
+figures = ["matplotlib==3.10.8"]  # 仅用于 figures/scripts 重新生成图片
+
+[tool.pytest.ini_options]
+testpaths = ["lab"]
+python_files = ["ch*.py"]
+python_functions = ["test_*"]
+# @AI_GENERATED: end
