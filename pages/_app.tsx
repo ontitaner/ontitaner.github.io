@@ -6,6 +6,7 @@ import { SyncProvider } from '@/lib/SyncContext';
 import { TabProvider } from '@/lib/TabContext';
 import { TagProvider } from '@/lib/TagContext';
 import { AnnotationProvider } from '@/lib/AnnotationContext';
+import { DocStoreProvider } from '@/lib/DocStoreContext';
 import '@/styles/globals.css';
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -20,7 +21,9 @@ export default function App({ Component, pageProps }: AppProps) {
             <AnnotationProvider>
               <TagProvider>
                 <TabProvider>
-                  <Component {...pageProps} />
+                  <DocStoreProvider>
+                    <Component {...pageProps} />
+                  </DocStoreProvider>
                 </TabProvider>
               </TagProvider>
             </AnnotationProvider>

@@ -1,10 +1,11 @@
 {
+  "_comment": "@AI_GENERATED",
   "name": "github-pages-docs",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "tsx scripts/generate-doc-data.ts && next build",
     "start": "next start",
     "export": "next build"
   },
@@ -27,6 +28,8 @@
     "@types/node": "^20.0.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
+    "tsx": "^4.23.15",
     "typescript": "^5.4.0"
-  }
+  },
+  "_comment_end": "@AI_GENERATED: end"
 }

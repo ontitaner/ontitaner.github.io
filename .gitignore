@@ -1,6 +1,9 @@
 node_modules/
 .next/
 out/
+# @AI_GENERATED
+public/docs-data/
+# @AI_GENERATED: end
 next-env.d.ts
 # @AI_GENERATED
 tsconfig.tsbuildinfo

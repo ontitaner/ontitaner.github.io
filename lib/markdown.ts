@@ -17,13 +17,24 @@ export interface DocMeta {
   slug: string;            // 相对 collections 的路径（不含 .md），如 ems-python-learning/00_导读
   title: string;           // = 文件名（不含 .md）
   collection: string;      // 集合目录名（slug 首段）
-  collectionName: string;  // 集合显示名（collection.json.name 或目录名）
-  collectionOrder: number; // 集合间排序（collection.json.order 或 999）
+  collectionName: string;  // collection.json.name 或目录名
+  collectionOrder: number; // collection.json.order 或 999
+  collectionDescription?: string;
+  collectionIcon?: string;
+  collectionLevel?: string;
+  collectionCover?: string | null;
   date?: string;
   icon?: string | null;
 }
 
-interface CollectionConf { name?: string; order?: number }
+interface CollectionConf {
+  name?: string;
+  order?: number;
+  description?: string;
+  icon?: string;
+  level?: string;
+  cover?: string;
+}
 
 function readCollectionConf(dir: string): CollectionConf {
   const f = path.join(collectionsDir, dir, 'collection.json');
@@ -65,6 +76,10 @@ export function getAllDocs(): DocMeta[] {
         collection,
         collectionName: conf.name || collection,
         collectionOrder: conf.order ?? 999,
+        collectionDescription: conf.description,
+        collectionIcon: conf.icon,
+        collectionLevel: conf.level,
+        collectionCover: conf.cover || null,
         date: stat.mtime.toISOString().slice(0, 10),
         icon: null,
       });

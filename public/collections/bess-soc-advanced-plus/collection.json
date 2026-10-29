@@ -1,4 +1,9 @@
 {
-  "name": "储能电池荷电状态估计与均衡进阶",
-  "order": 21
+  "_comment": "@AI_GENERATED",
+  "name": "储能SOC/SOE/SOP进阶",
+  "order": 21,
+  "description": "从状态估计、能力评估到储能电站履约验证",
+  "icon": "🔋",
+  "level": "进阶",
+  "_comment_end": "@AI_GENERATED: end"
 }
