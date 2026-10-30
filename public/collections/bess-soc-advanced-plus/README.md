@@ -16,7 +16,7 @@
 ## 学习约定
 
 - **先读主线，再按需深入**：正文先用晚峰任务、图表和直白结论建立直觉；公式推导与算法变体放入"深入"折叠。首次术语给中文、英文/缩写、一句话解释，统一定义见[附录 A](附录A_术语与符号词典.md)。
-- **算法可复算、代码可运行**：算法章说明输入输出、参数、公式与单位，并给至少两步连续手算。完整标准库实现在 `lab/`，每个实验含 `main()` 与 `test_*` 自检。
+- **算法可复算、代码可运行**：算法章先给符号公式块（含变量、单位与适用条件），再给至少两步连续手算；手算数值须与所在章公式小节和附录 A.8 常量一致。完整标准库实现在 `lab/`，每个实验含 `main()` 与 `test_*` 自检。
 - **合成数据先于现场结论**：真值器生成已知状态再注入噪声/偏置/丢包/延迟/失配；隐藏真值只用于评分，禁止回填估计器。
 - **算法与业务口径分开**：教学参数均为 `[教学示例]`；未核验的标准或合同条款不得用于宣称合规或验收通过。
 - **图表可重复生成**：`lab/` 只依赖标准库；`figures/scripts/` 是可选制图工具（需 matplotlib），固定种子、输出到 `img/`，不进入教程运行期依赖。
@@ -108,17 +108,23 @@ python -m pytest -q -p no:cacheprovider lab
 
 ```powershell
 python -m pip install ".[figures]"
-python figures/scripts/fig_ocv_slope.py              # 06 OCV 斜率
-python figures/scripts/fig_ecm_pulse.py              # 07 ECM 脉冲响应
-python figures/scripts/fig_identify.py               # 08 参数辨识
-python figures/scripts/fig_soh_capacity.py           # 09 容量标定
-python figures/scripts/fig_coulomb_drift.py          # 12 开环漂移
-python figures/scripts/fig_ekf_convergence.py        # 13 EKF 收敛
-python figures/scripts/fig_uncertainty_band.py       # 14 协方差/能量带
-python figures/scripts/fig_soe_sop_limits.py         # 17 SOP 约束取最小
-python figures/scripts/fig_cell_divergence.py        # 19 木桶与异常评分
-python figures/scripts/fig_balancing.py              # 20 均衡与运维
-python figures/scripts/fig_validation.py             # 21 业务回放证据
+python figures/scripts/fig_data_misalignment_impact.py  # 04 错拍与能力误判
+python figures/scripts/fig_ocv_slope.py               # 06 OCV 斜率
+python figures/scripts/fig_ocv_decision_map.py        # 06 OCV 校准决策
+python figures/scripts/fig_ecm_pulse.py               # 07 ECM 脉冲响应
+python figures/scripts/fig_identify.py                # 08 参数辨识
+python figures/scripts/fig_soh_capacity.py            # 09 容量标定
+python figures/scripts/fig_coulomb_drift.py           # 12 开环漂移
+python figures/scripts/fig_open_loop_error_components.py  # 12 开环误差分解
+python figures/scripts/fig_ekf_convergence.py         # 13 EKF 收敛
+python figures/scripts/fig_ekf_update_explained.py    # 13 单次更新分解
+python figures/scripts/fig_uncertainty_band.py        # 14–15 协方差/能量带
+python figures/scripts/fig_soe_sop_limits.py          # 17 SOP 约束取最小
+python figures/scripts/fig_sop_duration_curve.py      # 17 时长—功率曲线
+python figures/scripts/fig_cell_divergence.py         # 19 木桶与异常评分
+python figures/scripts/fig_cluster_capacity_compare.py  # 19 最低簇能量对比
+python figures/scripts/fig_balancing.py               # 20 均衡与运维
+python figures/scripts/fig_validation.py              # 21 业务回放证据
 ```
 
 数据图统一使用白底主题（`figures/scripts/_figstyle.py`）：固定随机种子、中文字体自动探测、结论式标题。

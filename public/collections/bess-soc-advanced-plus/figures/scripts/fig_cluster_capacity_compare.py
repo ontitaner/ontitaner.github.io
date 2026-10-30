@@ -6,7 +6,7 @@ scenarios = {
     "一致性良好": [0.55, 0.54, 0.55, 0.54],
     "一致性较差": [0.60, 0.58, 0.55, 0.45],
 }
-energy_per_cluster = 314.0 * 3.2 / 1000.0
+energy_per_cluster = 314.0 * 3.2 * 416 / 1000.0
 minimum_soc = .05
 fig, axes = plt.subplots(1, 2, figsize=(10.4, 4.4), sharey=True)
 
@@ -27,5 +27,5 @@ for ax, (name, socs) in zip(axes, scenarios.items()):
 axes[0].set_ylabel("簇 SOC (%)")
 axes[0].set_ylim(0, 80)
 
-save(fig, "cluster_capacity_compare", title="平均 SOC 均为 54.5%，最低簇不同会使可用能量相差 0.382 kWh")
+save(fig, "cluster_capacity_compare", title="平均 SOC 均为 54.5%，最低簇不同会使可用能量相差 150.5 kWh")
 # @AI_GENERATED: end

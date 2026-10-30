@@ -21,7 +21,8 @@
 | 能量状态 | State of Energy, SOE | 当前可用能量相对参考能量的比例，或直接给出可用能量 | 0～1 或 kWh | 02/16 |
 | 健康状态 | State of Health, SOH | 容量和动态性能相对参考状态的分项指标 | 0～1，不应只给无口径单值 | 02/09 |
 | 功率状态 | State of Power, SOP | 当前方向在指定持续时间内可承诺的功率 | kW，充/放分别给出 | 02/17 |
-| 有效容量 | Effective Capacity, `C_eff` | 在明确温度、倍率和端点下辨识的当前容量 | Ah | 07/09 |
+| 有效容量 | Effective Capacity, `C_eff` | 单体口径下，在明确温度、倍率和端点时辨识的当前容量 | Ah | 07/09 |
+| 站级有效能量 | Effective Site Energy, `E_eff` | `C_site × SOH_capacity`，站级 SOE 换算的分母 | kWh | 02/16 |
 | 额定容量 | Rated Capacity, `C_rated` | 铭牌或合同参考容量 | Ah 或 kWh，必须标口径 | 00 |
 | 可用能量 | Available Energy | 在 SOC 窗口、SOH、簇差和效率约束后可交付的能量 | kWh，并标测量平面 | 02/16 |
 | 履约 | Delivery/Performance | 在约定时段、功率和边界下实际完成计划 | kW、kWh、时长和偏差 | 00/21 |
@@ -146,8 +147,21 @@
 | `b_I` | 电流偏置 | A |
 | `T[k]` | 单体温度 | °C |
 | `C_rated` | 额定容量 | Ah 或 kWh，字段必须区分 |
-| `C_eff` | 有效容量 | Ah |
+| `C_eff` | 单体有效容量 | Ah |
+| `E_eff` | 站级有效能量 `C_site·SOH_capacity` | kWh |
+| `E_internal` | 运行窗口内直流侧能量 `max(0,SOC_low−SOC_min)·E_eff` | kWh |
+| `E_cell` | 单体名义能量 `C_cell·V_cell/1000` | kWh |
+| `E_site` | 站级名义能量 `E_cell·N_s·N_p` | kWh |
+| `E_dc` | 直流侧可交付能量 | kWh |
+| `E_ac` | 交流侧可交付能量 `E_dc·η_DC→AC` | kWh |
+| `C_cell` | 单体额定容量（正文简写 `C` 时同此） | Ah |
+| `V_cell` | 单体标称电压（正文简写 `V` 时同此） | V |
 | `η_c` | 充电库仑效率 | 0～1 |
+| `η_DC→AC` | 直流到交流路径效率，只在跨平面时乘一次 | 0～1 |
+| `η_bal` | 主动均衡转换效率 | 0～1 |
+| `I_bal` | 均衡电流 | A |
+| `Δt` | 均衡或回放区间时长 | s |
+| `SOH_capacity` | 容量型健康度 `C_eff/C_rated` | 0～1 |
 | `p[k]` | 动态电压偏移 | V |
 | `h[k]` | 滞回电压偏移 | V |
 | `r0` | 即时电流系数 | Ω |
@@ -158,9 +172,46 @@
 | `H` | `dOCV/dSOC` | V/SOC |
 | `R` | 电压量测噪声方差 | V² |
 | `P` | 状态或参数协方差 | 按元素单位组合 |
+| `w[k]` | 过程噪声 | 按状态单位 |
+| `v[k]` | 量测噪声 | V |
+| `φ[k]` | 回归特征向量（第 08/10 章） | 混合单位 |
+| `θ[k]` | 待估参数向量（第 10 章 RLS） | 混合单位 |
+| `β` | 最小二乘闭式解参数向量（第 08 章） | 混合单位 |
 | `K` | 状态修正增益 | SOC/V（标量示例） |
-| `e[k]` | 残差 | V |
+| `K[k]` | RLS 参数增益（第 10 章，与状态增益 `K` 区分） | 按参数单位组合 |
+| `e[k]` / `e` | 残差序列及单拍残差（电压残差 `y−H·x⁻`；第 10 章 RLS 同符号） | V |
+| `S` | 创新方差 `H·P⁻·Hᵀ+R` | V²（标量示例 `H²P+R`） |
+| `ν` | 标准化残差 `e/√S` | 无量纲 |
+| `NIS` | 标准化创新平方 `ν²` | 无量纲 |
+| `k_risk` | 风险覆盖系数（如 1.96），不与采样索引 `k` 混用 | 无量纲 |
+| `σ_SOC` | SOC 标准差 | SOC |
+| `RMSE` | 均方根误差 | mV（电压）/ 无量纲（SOC） |
+| `gap` | 泛化差距 `val_RMSE−train_RMSE` | mV |
+| `bias` | 残差均值 `mean(y−ŷ)` | mV |
 | `Q_net` | 循环积分净电量 | Ah |
+| `N_s` | 每簇串联单体数 | 416 |
+| `N_p` | 并联簇数 | 12 |
+| `N` | 参与统计的簇数（本教程等于 `N_p`） | 簇 |
+| `SOC_min` | 放电运行下限 | SOC，0～1 |
+| `C_site` | 站级名义能量 `C_rated` | kWh |
+| `E_cl` | 每簇名义能量 `C_cell·V_cell·N_s/1000` | kWh |
+| `E_loss` | 均衡损耗能量 | kWh |
+| `E_min` | 最低簇决定的可用能量 | kWh |
+| `E_avg` | 平均 SOC 口径的可用能量 | kWh |
+| `r` | 组内极差 `max−min` | SOC |
+| `μ` | 组内均值 | SOC |
+| `m` | 组内中位数基线 | SOC |
+| `d` | 组内中位数绝对偏差 MAD（第 19 章）；第 06 章 `OCV(z,T,d,t_rest)` 中 `d` 表示充放方向历史 | SOC |
+| `δ` | MAD 下限，防除零 | SOC |
+| `score_i` | 鲁棒异常评分 `|SOC_i−m|/max(d,δ)` | 无量纲 |
+| `m_est` | 估计风险余量（`k_risk·σ_SOC` 口径） | SOC |
+| `m_est'` | 风险化后余量 `k_state·m_est` | SOC |
+| `k_state` | 诊断状态系数（normal 1.0 / degraded 1.5） | 无量纲 |
+| `ΔSOC_cluster` | 最低簇相对站级的保守差 | SOC |
+| `SOE_AC` | 交流侧可用能量 | kWh |
+| `σ_E` | 能量不确定度（1σ） | kWh |
+| `P_energy(T)` | 指定时长的能量约束功率 | kW |
+| `SOP(T)` | 指定方向与时长可交付功率 | kW |
 
 ## A.8 统一站点常量
 

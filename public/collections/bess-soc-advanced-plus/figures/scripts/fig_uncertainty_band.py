@@ -52,12 +52,12 @@ xs = list(range(len(results)))
 zvals = [r.standardized_residual if math.isfinite(r.standardized_residual) else 0.0
          for r in results]
 ax3.axhline(THRESH, color=C_LIMIT, lw=1.1, ls="--")
-ax3.text(0.02, THRESH + 0.4, "阈值 |z|=3", ha="left", color=C_LIMIT, fontsize=8.5)
+ax3.text(0.02, THRESH + 0.4, "阈值 |ν|=3", ha="left", color=C_LIMIT, fontsize=8.5)
 for x, r in zip(xs, results):
     c = STATE_COLOR[r.state.value]
     y = r.standardized_residual if math.isfinite(r.standardized_residual) else 0.0
     ax3.scatter([x], [y], s=130, color=c, zorder=3, edgecolor="white", linewidth=1.3)
-    ztxt = f"z={r.standardized_residual:.2f}" if math.isfinite(r.standardized_residual) else "z=—"
+    ztxt = f"ν={r.standardized_residual:.2f}" if math.isfinite(r.standardized_residual) else "ν=—"
     ax3.annotate(f"{ztxt} · {r.state.value}\n连续 {r.continuous_bad}",
                  (x, y), (x, y - 2.8), ha="center", fontsize=8.2, color=c, fontweight="bold")
 ax3.plot(xs, zvals, color=C_GRID, lw=1.0, ls=":", zorder=1)
@@ -73,9 +73,9 @@ ax3.set_xticks(xs)
 ax3.set_xticklabels([f"样本{i}" for i in xs])
 ax3.set_ylim(-4.0, 12.5)
 ax3.set_xlim(-0.5, 4.5)
-ax3.set_ylabel("标准化残差 z")
+ax3.set_ylabel("标准化残差 ν")
 ax3.set_title("在线诊断时间线（绿=normal 橙=degraded 红=invalid）：连续 2 次越限进入 degraded")
 
 save(fig, "uncertainty_band",
-     title="协方差收敛 → 能量区间 → 在线诊断：σ、z 与状态全部标在图内")
+     title="协方差收敛 → 能量区间 → 在线诊断：σ、ν 与状态全部标在图内")
 # @AI_GENERATED: end

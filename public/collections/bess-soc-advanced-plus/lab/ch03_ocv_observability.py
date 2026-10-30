@@ -71,7 +71,7 @@ def test_inverse_lookup_uses_selected_layer_and_branch():
 
 
 def main():
-    print(f"{'SOC':>6} {'H(V/SOC)':>10} {'H²/R':>12} {'K(SOC/V)':>11} {'K·H':>8}")
+    print(f"{'SOC':>6} {'H(V/SOC)':>10} {'H^2/R':>12} {'K(SOC/V)':>11} {'K*H':>8}")
     for soc in (0.05, 0.30, 0.50, 0.70, 0.95):
         h, info, gain, fraction = observability_row(soc)
         print(f"{soc:>6.0%} {h:>10.3f} {info:>12.0f} {gain:>11.3f} {fraction:>8.1%}")

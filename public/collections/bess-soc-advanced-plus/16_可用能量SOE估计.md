@@ -18,22 +18,22 @@ SOC 描述电荷比例，调度要求的是交流侧能量。EMS 必须将状态
 ## 16.3 关键术语
 
 - **SOE（State of Energy）**：当前运行窗口内可用能量，以 kWh 或比例表示。
-- **估计余量 `m_est`**：由 `kσ` 风险口径得到的 SOC 保守扣减。
+- **估计余量 `m_est`**：由 `k_risk·σ_SOC` 风险口径得到的 SOC 保守扣减。
 - **最低簇差 `ΔSOC_cluster`**：最低簇相对站级估计的保守差值。
 
 ## 16.4 SOE 公式
 
 ```text
 SOC_low = max(0, SOC − m_est − ΔSOC_cluster)
-C_eff = C_site × SOH_capacity
-SOE_AC = max(0, SOC_low − SOC_min) × C_eff × η_DC→AC
+E_eff = C_site × SOH_capacity
+SOE_AC = max(0, SOC_low − SOC_min) × E_eff × η_DC→AC
 ```
 
 | 变量 | 含义 |
 |---|---|
 | `m_est` | 估计风险余量，单位 SOC |
 | `ΔSOC_cluster` | 最低簇差，单位 SOC |
-| `C_eff` | 有效站级能量，单位 kWh |
+| `E_eff` | 有效站级能量，单位 kWh |
 | `η_DC→AC` | 直流到交流效率，只乘一次 |
 | `SOC_min` | 放电运行下限 |
 
@@ -41,20 +41,20 @@ SOE_AC = max(0, SOC_low − SOC_min) × C_eff × η_DC→AC
 
 统一站：`C_site=5015.96 kWh`、`SOC=30%`、`m_est=3%`、`ΔSOC_cluster=2%`、`SOH=92%`、`SOC_min=10%`、`η=0.931`。
 
-**第 1 步：收窄 SOC 并计算有效容量。**
+**第 1 步：收窄 SOC 并计算站级有效能量。**
 
 ```text
 SOC_low = 30% − 3% − 2% = 25%
-C_eff = 5015.96 × 0.92 = 4614.68 kWh
+E_eff = 5015.96 × 0.92 = 4614.68 kWh
 ```
 
 **第 2 步：转换为交流侧 SOE。**
 
 ```text
-SOE_AC = (25% − 10%) × 4614.68 × 0.931 = 644.4 kWh
+SOE_AC = (25% − 10%) × 4614.68 × 0.931 = 644.44 kWh ≈ 644.4 kWh
 ```
 
-这 644.4 kWh 已是交流侧、放电方向、到 10% 下限的保守能量，不能再次乘效率。
+这 644.4 kWh 已是交流侧、放电方向、到 10% 下限的保守能量，不能再次乘效率。后续功率换算保留未取整值 `644.44 kWh`，以免四舍五入在除法后放大。
 
 ## 16.6 核心实现
 

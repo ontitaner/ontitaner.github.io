@@ -2,7 +2,7 @@
 """第17章：任务时长决定SOP瓶颈。"""
 from _figstyle import plt, save, C_CHG, C_DIS, C_OK, C_GRID
 
-soe_kwh = 644.4
+soe_kwh = 644.44
 minutes = list(range(5, 121))
 energy_limit = [soe_kwh / (m/60.0) for m in minutes]
 bms, pcs, grid = 2200.0, 2500.0, 2000.0

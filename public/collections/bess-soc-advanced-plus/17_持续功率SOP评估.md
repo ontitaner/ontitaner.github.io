@@ -26,19 +26,19 @@ SOP_discharge(T) = min(P_energy(T), P_BMS, P_PCS, P_grid)
 
 ## 17.4 手算示例
 
-接第 16 章：`SOE_AC=644.4 kWh`、`P_BMS=2200 kW`、`P_PCS=2500 kW`、`P_grid=2000 kW`。
+接第 16 章：`SOE_AC=644.4 kWh`（未取整 644.44 kWh）、`P_BMS=2200 kW`、`P_PCS=2500 kW`、`P_grid=2000 kW`。
 
 **第 1 步：能量约束功率。**
 
 ```text
-P_energy(1800 s) = 644.4/(1800/3600) = 1288.9 kW
+P_energy(1800 s) = 644.44/(1800/3600) = 1288.9 kW
 ```
 
 **第 2 步：取最小值。**
 
 ```text
 SOP(30 min) = min(1288.9, 2200, 2500, 2000) = 1288.9 kW
-按 2000 kW 可持续 = 644.4/2000×60 = 19.3 min
+按 2000 kW 可持续 = 644.44/2000×60 = 19.3 min
 ```
 
 原计划需要 1000 kWh，能量不足。正确动作是降至约 1.289 MW、缩短时长或补能后重排。
@@ -78,11 +78,11 @@ def continuous_power(soe_ac_kwh: float, duration_s: float,
 
 
 if __name__ == "__main__":
-    result = continuous_power(644.4, 1800.0, 2200.0, 2500.0, 2000.0)
+    result = continuous_power(644.44, 1800.0, 2200.0, 2500.0, 2000.0)
     print(f"能量约束={result.energy_limit_kw:.1f} kW")
     print(f"SOP={result.sop_kw:.1f} kW，瓶颈={result.bottleneck}")
     print(f"按 2 MW 可持续={result.duration_at_grid_limit_min:.1f} min")
-    assert round(result.sop_kw, 1) == 1288.8
+    assert round(result.sop_kw, 1) == 1288.9
     assert result.bottleneck == "energy"
 ```
 
@@ -91,8 +91,8 @@ if __name__ == "__main__":
 ## 17.6 时长切换
 
 ```text
-T=15 min：P_energy=2577.6 kW → SOP=2000 kW，瓶颈=并网
-T=30 min：P_energy=1288.8 kW → SOP=1288.8 kW，瓶颈=能量
+T=15 min：P_energy=2577.8 kW → SOP=2000 kW，瓶颈=并网
+T=30 min：P_energy=1288.9 kW → SOP=1288.9 kW，瓶颈=能量
 T=60 min：P_energy=644.4 kW  → SOP=644.4 kW，瓶颈=能量
 ```
 
@@ -106,7 +106,7 @@ T=60 min：P_energy=644.4 kW  → SOP=644.4 kW，瓶颈=能量
 
 | 约束项 | 本例值 | 含义 |
 |---|---:|---|
-| 能量约束 | 1288.8 kW | 当前瓶颈 |
+| 能量约束 | 1288.9 kW | 当前瓶颈 |
 | BMS | 2200 kW | 实时放电能力 |
 | PCS | 2500 kW | 交流额定能力 |
 | 并网出口 | 2000 kW | 出口/调度限制 |
@@ -121,7 +121,7 @@ T=60 min：P_energy=644.4 kW  → SOP=644.4 kW，瓶颈=能量
 <summary>参考答案</summary>
 
 1. 同样能量在不同时长下可持续功率不同；不带 T 的功率无法用于调度申报。
-2. `min(1288.8,2200,2500,900)=900 kW`，瓶颈是并网出口。
+2. `min(1288.9,2200,2500,900)=900 kW`，瓶颈是并网出口。
 3. 不同平面的数值口径不同，直接取最小会把不可比的量混在一起。
 
 </details>

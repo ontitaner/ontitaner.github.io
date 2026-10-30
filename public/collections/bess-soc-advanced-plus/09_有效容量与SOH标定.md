@@ -138,8 +138,8 @@ python lab/ch04_identification.py
 
 ```text
 SOH_capacity = C_eff / C_rated
-C_eff（站级） = 5.016 MWh × SOH_capacity
-SOE = f(SOC, C_eff, 运行窗口, 效率)
+E_eff（站级） = 5.016 MWh × SOH_capacity
+SOE = f(SOC, E_eff, 运行窗口, 效率)
 ```
 
 晚峰案例的 92% 容量型 SOH 同时影响 SOC 的分母、可用能量和可持续时间。

@@ -39,7 +39,7 @@ def energy_band(soc: float, sigma_soc: float, minimum_soc: float = 0.10,
                 ) -> Tuple[float, float]:
     """Return internal-to-AC available energy and its 1-sigma uncertainty in kWh.
 
-    This is the local linear propagation sigma_E = C_eff * eta * sigma_SOC.
+    This is the local linear propagation sigma_E = E_eff * eta * sigma_SOC.
     It applies only while capacity, efficiency, and the active SOC window are fixed.
     """
     if not 0.0 <= soc <= 1.0 or sigma_soc < 0.0:
@@ -59,8 +59,8 @@ def diagnose(quality: Quality, residual_v: float, innovation_std_v: float,
              required_consecutive: int = 2) -> DiagnosticResult:
     """Classify one update using input quality plus standardized innovation/NIS.
 
-    A residual is r = V_measured - V_predicted, z = r / sqrt(S), and NIS = z^2.
-    Two consecutive |z| >= threshold_sigma observations enter degraded mode;
+    A residual is e = V_measured - V_predicted, nu = e / sqrt(S), and NIS = nu^2.
+    Two consecutive |nu| >= threshold_sigma observations enter degraded mode;
     invalid input immediately rejects the update and capability refresh.
     """
     if innovation_std_v <= 0.0 or threshold_sigma <= 0.0 or required_consecutive < 1:
@@ -71,16 +71,16 @@ def diagnose(quality: Quality, residual_v: float, innovation_std_v: float,
         return DiagnosticResult(quality, residual_v, math.nan, math.nan, 0,
                                 DiagnosticState.INVALID,
                                 "reject sample; freeze capability and request fresh aligned data")
-    z = residual_v / innovation_std_v
-    nis = z * z
-    bad = abs(z) >= threshold_sigma
+    nu = residual_v / innovation_std_v
+    nis = nu * nu
+    bad = abs(nu) >= threshold_sigma
     continuous_bad = previous_bad + 1 if bad else 0
     if quality is Quality.SUSPECT or continuous_bad >= required_consecutive:
         action = "hold measurement correction; widen margin, derate and raise diagnostic event"
-        return DiagnosticResult(quality, residual_v, z, nis, continuous_bad,
+        return DiagnosticResult(quality, residual_v, nu, nis, continuous_bad,
                                 DiagnosticState.DEGRADED, action)
     action = "accept update and publish normal uncertainty" if not bad else "record residual; await consecutive confirmation"
-    return DiagnosticResult(quality, residual_v, z, nis, continuous_bad,
+    return DiagnosticResult(quality, residual_v, nu, nis, continuous_bad,
                             DiagnosticState.NORMAL, action)
 
 
@@ -134,11 +134,11 @@ def main() -> None:
     energy_kwh, sigma_kwh = energy_band(0.30, 0.015)
     print(f"[教学示例] SOE 点值={energy_kwh:.3f} kWh, ±1σ={sigma_kwh:.3f} kWh, "
           f"1.96σ下界={energy_kwh - 1.96 * sigma_kwh:.3f} kWh")
-    print(f"{'步':>2} {'质量':>8} {'r(V)':>8} {'z':>7} {'NIS':>7} {'连续':>4} {'状态':>10} 动作")
+    print(f"{'步':>2} {'质量':>8} {'e(V)':>8} {'ν':>7} {'NIS':>7} {'连续':>4} {'状态':>10} 动作")
     for index, item in enumerate(run()):
-        z = f"{item.standardized_residual:.2f}" if math.isfinite(item.standardized_residual) else "--"
+        nu = f"{item.standardized_residual:.2f}" if math.isfinite(item.standardized_residual) else "--"
         nis = f"{item.nis:.2f}" if math.isfinite(item.nis) else "--"
-        print(f"{index:>2} {item.quality.value:>8} {item.residual_v:>8.3f} {z:>7} {nis:>7} "
+        print(f"{index:>2} {item.quality.value:>8} {item.residual_v:>8.3f} {nu:>7} {nis:>7} "
               f"{item.continuous_bad:>4} {item.state.value:>10} {item.action}")
     test_ch06()
     print("自检通过")
