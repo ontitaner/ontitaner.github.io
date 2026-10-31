@@ -3,7 +3,7 @@
 
 本课程面向储能转行入门者、在校学生，以及希望深入 SOC/SOE/SOP 工程实践的专业人士。它从软件与业务协同视角解释储能状态估计、可信度传播、一致性运维和履约验证；不设计采样电路、均衡器件或 BMS 固件算法。目标是让读者逐步回答三个问题：输入数据能不能用，状态估计为什么可信，业务承诺为什么能或不能履约。
 
-全课程围绕同一个晚峰案例：**17:30 观测到 SOC，18:00 要求以 2 MW 放电 30 分钟**。22 章逐步消除其中的每一类未知，最后在第 21 章形成可复现的履约证据。
+全课程围绕同一个晚峰案例：**17:30 观测到 SOC，18:00 要求以 2 MW 放电 30 分钟**。26 章逐步消除其中的每一类未知，最后在第 25 章形成可复现的履约证据。
 
 ## 读者与学习路径
 
@@ -35,7 +35,7 @@
 | 时间 | 秒，用本地单调时间算 `dt` | 设备时间只作来源与诊断 |
 | SOC | 代码 0～1，正文可写百分比 | 禁止 50 与 0.50 混用 |
 
-## 22 章课程目录
+## 26 章课程目录
 
 | 章 | 主题 | 对应 lab | 主图 |
 |---|---|---|---|
@@ -45,40 +45,44 @@
 | [03](03_遥测来源与测量平面.md) | 遥测来源与单体/簇/直流/交流/并网测量平面 | ch01 | — |
 | [04](04_时序对齐与质量门控.md) | 采样时序对齐与数据质量门控 | ch01 | 时序图(Mermaid) |
 | [05](05_容量电量与能量换算.md) | 容量、电量、电压与能量的工程换算 | ch02 | 换算链(Mermaid) |
-| [06](06_OCV特性与可观测性.md) | OCV、温度分层、滞回与可观测性 | ch03 | ocv_curve_slope |
-| [07](07_等效电路与状态空间建模.md) | 一阶 RC 等效电路与状态空间建模 | ch02 | ecm_pulse |
-| [08](08_模型参数辨识.md) | 模型参数辨识：R0、R1 与恢复时间常数 τ | ch04 | identify_pulse |
-| [09](09_有效容量与SOH标定.md) | 有效容量 C_eff 与容量型 SOH 标定 | ch04 | soh_capacity |
-| [10](10_参数验证与版本治理.md) | 参数验证、版本发布与适用域治理 | ch04 | 发布卡(表格) |
-| [11](11_安时积分与SOC递推.md) | 安时积分法与 SOC 递推 | ch05 | — |
-| [12](12_开环漂移机理.md) | 开环漂移机理：初值误差与电流零漂 | ch05 | coulomb_drift |
-| [13](13_扩展卡尔曼滤波.md) | 扩展卡尔曼滤波：预测与量测修正 | ch05 | ekf_convergence |
-| [14](14_协方差与噪声整定.md) | 协方差传播与过程/量测噪声整定 | ch06 | uncertainty_band |
-| [15](15_在线诊断与可信度降级.md) | 在线诊断：残差、NIS 与可信度降级 | ch06 | uncertainty_band |
-| [16](16_可用能量SOE估计.md) | 从 SOC 到可用能量 SOE | ch07 | — |
-| [17](17_持续功率SOP评估.md) | 从 SOE 到指定时长持续功率 SOP | ch07 | soe_sop_limits |
-| [18](18_风险化能力与调度决策.md) | 风险化能力评估与 EMS 调度决策 | ch07 | — |
-| [19](19_成组一致性与异常检测.md) | 成组一致性、最低簇与异常检测 | ch08 | cell_divergence |
-| [20](20_均衡评估与运维闭环.md) | 均衡效果评估与运维闭环 | ch09 | balancing_convergence |
-| [21](21_业务回放与履约验证.md) | 业务回放、履约验证与验收证据 | ch10 | ch10_business_replay_evidence |
+| [06](06_OCV-SOC曲线构建.md) | OCV-SOC 曲线构建、温度与滞回标定 | ch03 | ocv_calibration |
+| [07](07_OCV特性与可观测性.md) | OCV 特性：斜率、可观测性与信息量瓶颈 | ch03 | ocv_curve_slope |
+| [08](08_等效电路与状态空间建模.md) | 一阶 RC 等效电路与状态空间建模 | ch02 | ecm_pulse |
+| [09](09_模型参数辨识.md) | 模型参数辨识：R0、R1 与恢复时间常数 τ | ch04 | identify_pulse |
+| [10](10_SOH与可用容量分析.md) | 有效容量 C_eff 与容量型 SOH 标定 | ch04 | soh_capacity |
+| [11](11_参数验证与版本治理.md) | 参数验证、版本发布与适用域治理 | ch04 | 发布卡(表格) |
+| [12](12_初始SOC获取.md) | 初始 SOC 获取：静置 OCV 查表 | ch05 | initial_soc |
+| [13](13_安时积分与SOC递推.md) | 安时积分法与 SOC 递推 | ch05 | — |
+| [14](14_开环漂移机理.md) | 开环漂移机理：初值误差与电流零漂 | ch05 | coulomb_drift |
+| [15](15_自放电.md) | 自放电机理与静置 SOC 修正 | ch05 | self_discharge |
+| [16](16_SOC校准与重置.md) | SOC 校准：满充/满放事件检测与重置 | ch05 | soc_calibration |
+| [17](17_扩展卡尔曼滤波.md) | 扩展卡尔曼滤波：预测与量测修正 | ch05 | ekf_convergence |
+| [18](18_协方差与噪声整定.md) | 协方差传播与过程/量测噪声整定 | ch06 | uncertainty_band |
+| [19](19_在线诊断与可信度降级.md) | 在线诊断：残差、NIS 与可信度降级 | ch06 | uncertainty_band |
+| [20](20_SOE能量状态估计.md) | 从 SOC 到可用能量 SOE | ch07 | — |
+| [21](21_持续功率SOP评估.md) | 从 SOE 到指定时长持续功率 SOP | ch07 | soe_sop_limits |
+| [22](22_风险化能力与调度决策.md) | 风险化能力评估与 EMS 调度决策 | ch07 | — |
+| [23](23_成组一致性与异常检测.md) | 成组一致性、最低簇与异常检测 | ch08 | cell_divergence |
+| [24](24_均衡评估与运维闭环.md) | 均衡效果评估与运维闭环 | ch09 | balancing_convergence |
+| [25](25_业务回放与履约验证.md) | 业务回放、履约验证与验收证据 | ch10 | ch10_business_replay_evidence |
 | [附录 A](附录A_术语与符号词典.md) | 术语与符号词典 | — | — |
 
-说明：lab 实验以第 03–21 章解决的核心算法为单位组织，多个章节可共享同一实验（如 11–13 章共享 `ch05`）；正文均注明对应实验。
+说明：lab 实验以第 03–25 章解决的核心算法为单位组织，多个章节可共享同一实验（如 13–17 章共享 `ch05`）；正文均注明对应实验。
 
 ## 共享代码结构
 
 ```text
 lab/soc_core.py                      统一常量、质量门控、OCV、状态模型、统计与辨识
 lab/ch01_data_contract.py            数据异常、同窗对齐和错拍（第03–04章）
-lab/ch02_state_space.py              不规则 dt 与真值故障注入（第05、07章）
-lab/ch03_ocv_observability.py        温度/滞回/松弛和 H²/R（第06章）
-lab/ch04_identification.py           带噪拟合、训练验证、有效容量（第08–10章）
-lab/ch05_production_ekf.py           安时积分基线与三状态 EKF（第11–13章）
-lab/ch06_uncertainty_diagnostics.py  不确定度传播、残差和降级诊断（第14–15章）
-lab/ch07_soe_sop.py                  交流侧 SOE、指定时长 SOP 与风险化（第16–18章）
-lab/ch08_group_anomaly.py            最低簇能力、MAD 评分和异常事件（第19章）
-lab/ch09_balancing_effect.py         同工况均衡效果与运维关闭链（第20章）
-lab/ch10_business_replay.py          冻结输入的计划、能力和实际回放（第21章）
+lab/ch02_state_space.py              不规则 dt 与真值故障注入（第05、08章）
+lab/ch03_ocv_observability.py        温度/滞回/松弛和 H²/R（第06–07章）
+lab/ch04_identification.py           带噪拟合、训练验证、有效容量（第09–11章）
+lab/ch05_production_ekf.py           安时积分基线与三状态 EKF（第12–17章）
+lab/ch06_uncertainty_diagnostics.py  不确定度传播、残差和降级诊断（第18–19章）
+lab/ch07_soe_sop.py                  交流侧 SOE、指定时长 SOP 与风险化（第20–22章）
+lab/ch08_group_anomaly.py            最低簇能力、MAD 评分和异常事件（第23章）
+lab/ch09_balancing_effect.py         同工况均衡效果与运维关闭链（第24章）
+lab/ch10_business_replay.py          冻结输入的计划、能力和实际回放（第25章）
 ```
 
 ## 运行课程实验
@@ -109,22 +113,22 @@ python -m pytest -q -p no:cacheprovider lab
 ```powershell
 python -m pip install ".[figures]"
 python figures/scripts/fig_data_misalignment_impact.py  # 04 错拍与能力误判
-python figures/scripts/fig_ocv_slope.py               # 06 OCV 斜率
-python figures/scripts/fig_ocv_decision_map.py        # 06 OCV 校准决策
-python figures/scripts/fig_ecm_pulse.py               # 07 ECM 脉冲响应
-python figures/scripts/fig_identify.py                # 08 参数辨识
-python figures/scripts/fig_soh_capacity.py            # 09 容量标定
-python figures/scripts/fig_coulomb_drift.py           # 12 开环漂移
-python figures/scripts/fig_open_loop_error_components.py  # 12 开环误差分解
-python figures/scripts/fig_ekf_convergence.py         # 13 EKF 收敛
-python figures/scripts/fig_ekf_update_explained.py    # 13 单次更新分解
-python figures/scripts/fig_uncertainty_band.py        # 14–15 协方差/能量带
-python figures/scripts/fig_soe_sop_limits.py          # 17 SOP 约束取最小
-python figures/scripts/fig_sop_duration_curve.py      # 17 时长—功率曲线
-python figures/scripts/fig_cell_divergence.py         # 19 木桶与异常评分
-python figures/scripts/fig_cluster_capacity_compare.py  # 19 最低簇能量对比
-python figures/scripts/fig_balancing.py               # 20 均衡与运维
-python figures/scripts/fig_validation.py              # 21 业务回放证据
+python figures/scripts/fig_ocv_slope.py               # 07 OCV 斜率
+python figures/scripts/fig_ocv_decision_map.py        # 07 OCV 校准决策
+python figures/scripts/fig_ecm_pulse.py               # 08 ECM 脉冲响应
+python figures/scripts/fig_identify.py                # 09 参数辨识
+python figures/scripts/fig_soh_capacity.py            # 10 容量标定
+python figures/scripts/fig_coulomb_drift.py           # 14 开环漂移
+python figures/scripts/fig_open_loop_error_components.py  # 14 开环误差分解
+python figures/scripts/fig_ekf_convergence.py         # 17 EKF 收敛
+python figures/scripts/fig_ekf_update_explained.py    # 17 单次更新分解
+python figures/scripts/fig_uncertainty_band.py        # 18–19 协方差/能量带
+python figures/scripts/fig_soe_sop_limits.py          # 21 SOP 约束取最小
+python figures/scripts/fig_sop_duration_curve.py      # 21 时长—功率曲线
+python figures/scripts/fig_cell_divergence.py         # 23 木桶与异常评分
+python figures/scripts/fig_cluster_capacity_compare.py  # 23 最低簇能量对比
+python figures/scripts/fig_balancing.py               # 24 均衡与运维
+python figures/scripts/fig_validation.py              # 25 业务回放证据
 ```
 
 数据图统一使用白底主题（`figures/scripts/_figstyle.py`）：固定随机种子、中文字体自动探测、结论式标题。
