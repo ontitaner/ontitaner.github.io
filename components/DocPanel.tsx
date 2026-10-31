@@ -13,6 +13,8 @@ import TableOfContents from './TableOfContents';
 import ReaderControls from './ReaderControls';
 import ExportPdf from './ExportPdf';
 import ReadingMode from './ReadingMode';
+import ThemeToggle from './ThemeToggle';
+import { IconSearch } from './Icons';
 import { useTabContext } from '@/lib/TabContext';
 import { DocMeta } from '@/lib/markdown';
 import { DocData } from '@/lib/docData';
@@ -25,6 +27,7 @@ interface DocPanelProps {
   docs?: DocMeta[];
   onOpenDoc?: (slug: string, title: string, panel?: 'left' | 'right') => Promise<void>;
   onDirectory?: (collection: string) => void;
+  onSearchOpen?: () => void;
 }
 
 function DocContent({ doc, contentRef, onOpenDoc }: { doc: DocData; contentRef: React.RefObject<HTMLDivElement>; onOpenDoc?: (slug: string, title: string) => void }) {
@@ -56,7 +59,7 @@ function DocContent({ doc, contentRef, onOpenDoc }: { doc: DocData; contentRef: 
   })}</div>;
 }
 
-export default function DocPanel({ panel, documents, docs, onOpenDoc, onDirectory }: DocPanelProps) {
+export default function DocPanel({ panel, documents, docs, onOpenDoc, onDirectory, onSearchOpen }: DocPanelProps) {
   const { activeLeft, activeRight, moveToPanel, tabs } = useTabContext();
   const activeSlug = panel === 'left' ? activeLeft : activeRight;
   const panelTabs = tabs.filter(tab => tab.panel === panel);
@@ -78,7 +81,7 @@ export default function DocPanel({ panel, documents, docs, onOpenDoc, onDirector
       {doc ? <>
         <ReadingProgress scrollRef={scrollRef} />
         <div className="doc-scroll" ref={scrollRef} style={{ position: 'relative' }}>
-          <div className="doc-header"><div><h1>{doc.title}</h1>{doc.date && <span className="doc-date">{doc.date}</span>}</div><ReadingMode /><ExportPdf title={doc.title} scrollRef={scrollRef} /></div>
+          <div className="doc-header"><div><h1>{doc.title}</h1>{doc.date && <span className="doc-date">{doc.date}</span>}</div><div className="doc-toolbar">{onSearchOpen && <button className="doc-toolbar-btn" onClick={onSearchOpen} title="搜索 Ctrl+K" aria-label="搜索"><IconSearch size={14} /></button>}<ThemeToggle /><ReadingMode /><ExportPdf title={doc.title} scrollRef={scrollRef} /></div></div>
           <TagEditor slug={doc.slug} />
           {docs && onOpenDoc && onDirectory && <ReaderControls currentSlug={doc.slug} docs={docs} onOpen={(slug, title) => onOpenDoc(slug, title, panel)} onDirectory={onDirectory} />}
           <DocContent doc={doc} contentRef={contentRef} onOpenDoc={onOpenDoc ? (slug, title) => { void onOpenDoc(slug, title, panel); } : undefined} />

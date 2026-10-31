@@ -7,6 +7,7 @@ import { useTabContext } from '@/lib/TabContext';
 import { useDocStore } from '@/lib/DocStoreContext';
 import { getAllDocs, DocMeta } from '@/lib/markdown';
 import { IconBolt, IconDoc, IconSearch } from '@/components/Icons';
+import ThemeToggle from '@/components/ThemeToggle';
 import siteConfig from '@/site.config';
 
 interface HomeProps {
@@ -33,7 +34,7 @@ function displayTitle(title: string): string {
 }
 
 export default function Home({ docs }: HomeProps) {
-  const { tabs, splitMode, openTab } = useTabContext();
+  const { tabs, splitMode, openTab, closeTab } = useTabContext();
   const { documents, loadDoc } = useDocStore();
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
@@ -99,7 +100,13 @@ export default function Home({ docs }: HomeProps) {
       <div className={`panels-container ${splitMode ? 'split' : ''} ${hasOpenTabs || activeCollection ? 'panels-reader' : 'panels-home'}`}>
         {activeCollection ? (
           <main className="collection-page">
-            <button className="collection-back" onClick={() => setSelectedCollection(null)}>← 所有课程</button>
+            <div className="collection-top-bar">
+              <button className="collection-back" onClick={() => { setSelectedCollection(null); tabs.forEach(t => closeTab(t.slug)); }}>← 所有课程</button>
+              <div className="doc-toolbar">
+                <button className="doc-toolbar-btn" onClick={() => setSearchOpen(true)} title="搜索 Ctrl+K" aria-label="搜索"><IconSearch size={14} /></button>
+                <ThemeToggle />
+              </div>
+            </div>
             <header className="collection-page-header">
               <span className="collection-page-icon" aria-hidden="true">{activeCollection.icon || <IconDoc size={28} />}</span>
               <div>
@@ -121,15 +128,18 @@ export default function Home({ docs }: HomeProps) {
           </main>
         ) : hasOpenTabs ? (
           <>
-            <DocPanel panel="left" documents={documents} docs={docs} onOpenDoc={handleOpenDoc} onDirectory={handleDirectory} />
+            <DocPanel panel="left" documents={documents} docs={docs} onOpenDoc={handleOpenDoc} onDirectory={handleDirectory} onSearchOpen={() => setSearchOpen(true)} />
             {splitMode && <div className="panel-divider" />}
-            {splitMode && <DocPanel panel="right" documents={documents} docs={docs} onOpenDoc={handleOpenDoc} onDirectory={handleDirectory} />}
+            {splitMode && <DocPanel panel="right" documents={documents} docs={docs} onOpenDoc={handleOpenDoc} onDirectory={handleDirectory} onSearchOpen={() => setSearchOpen(true)} />}
           </>
         ) : (
           <main className="poster-home">
             <header className="poster-home-header">
               <div className="poster-home-brand"><IconBolt size={20} /><span>{siteConfig.title}</span></div>
-              <button className="poster-search" onClick={() => setSearchOpen(true)} aria-label="搜索"><IconSearch size={18} /></button>
+              <div className="poster-toolbar">
+                <button className="poster-search" onClick={() => setSearchOpen(true)} aria-label="搜索"><IconSearch size={18} /></button>
+                <ThemeToggle />
+              </div>
             </header>
             <div className="poster-home-intro">
               <h1>课程目录</h1>
