@@ -5,5 +5,6 @@
   "description": "从状态估计、能力评估到储能电站履约验证",
   "icon": "🔋",
   "level": "进阶",
+  "cover": "img/cover.png",
   "_comment_end": "@AI_GENERATED: end"
 }
