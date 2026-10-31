@@ -2845,4 +2845,30 @@ body[data-immersive="on"] .doc-header { max-width: 960px; margin-left: auto; mar
   .collection-page-header { gap: 12px; }
   .collection-page-icon { width: 44px; height: 44px; font-size: 20px; }
 }
+
+/* ---- 截图模式：临时解除所有高度约束，支持 Chrome F12 Capture full size screenshot ---- */
+html.screenshot-mode,
+html.screenshot-mode body {
+  overflow: visible !important;
+  height: auto !important;
+}
+html.screenshot-mode .layout,
+html.screenshot-mode .panels-container {
+  height: auto !important;
+}
+html.screenshot-mode .doc-scroll {
+  overflow: visible !important;
+  max-height: none !important;
+}
+html.screenshot-mode .sidebar,
+html.screenshot-mode .doc-panel + .doc-panel {
+  display: none !important;
+}
+html.screenshot-mode .doc-panel {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+html.screenshot-mode .panels-container {
+  margin-left: 0 !important;
+}
 /* @AI_GENERATED: end */

@@ -1,4 +1,6 @@
 import type { AppProps } from 'next/app';
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
 import Head from 'next/head';
 import LockScreen from '@/components/LockScreen';
 import { ThemeProvider } from '@/lib/ThemeContext';
@@ -9,7 +11,17 @@ import { AnnotationProvider } from '@/lib/AnnotationContext';
 import { DocStoreProvider } from '@/lib/DocStoreContext';
 import '@/styles/globals.css';
 
+function useScreenshotMode() {
+  const router = useRouter();
+  useEffect(() => {
+    if (router.query.screenshot === '1') {
+      document.documentElement.classList.add('screenshot-mode');
+    }
+  }, [router.query.screenshot]);
+}
+
 export default function App({ Component, pageProps }: AppProps) {
+  useScreenshotMode();
   return (
     <>
       <Head>
