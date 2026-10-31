@@ -30,7 +30,7 @@ def main():
     soc_ah_uncorrected = np.zeros(n)
     soc_ah_calibrated = np.zeros(n)
 
-    q_nom = 280.0
+    q_nom = 314.0
     b_i = 0.5
     soc = 40.0
     soc_unc = 40.0

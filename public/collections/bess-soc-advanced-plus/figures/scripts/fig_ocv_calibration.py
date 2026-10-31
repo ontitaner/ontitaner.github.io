@@ -18,8 +18,8 @@ def main():
                  fontsize=13, y=0.98)
 
     steps = 21
-    charge_current = 14.0
-    discharge_current = -14.0
+    charge_current = 15.7
+    discharge_current = -15.7
     rest_dur = 2 * 3600
     step_dur = 720
     period = step_dur + rest_dur
@@ -72,7 +72,7 @@ def main():
     ax1.axhline(y=0, color=C_GRID, lw=0.5)
     ax1.set_ylabel("电流 (A)", color=C_CHG)
     ax1.tick_params(axis="y", labelcolor=C_CHG)
-    ax1.set_title("上栏：电流激励（C/20 ≈ 14 A 分段充放 + 每步静置 2 h）", fontsize=11)
+    ax1.set_title("上栏：电流激励（C/20 ≈ 15.7 A 分段充放 + 每步静置 2 h）", fontsize=11)
 
     mid_h = steps * period / 3600
     ax1.annotate("充电阶段", xy=(mid_h * 0.35, 17), fontsize=10, color=C_CHG, fontweight="bold")
