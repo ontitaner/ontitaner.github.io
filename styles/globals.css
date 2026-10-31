@@ -18,11 +18,20 @@
 }
 
 /* Global scrollbar */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+html::-webkit-scrollbar { width: 6px; height: 6px; }
+html::-webkit-scrollbar-track { background: var(--bg-primary); }
+html::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+html::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Internal scrollable areas */
 *::-webkit-scrollbar { width: 6px; height: 6px; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 *::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-html { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
