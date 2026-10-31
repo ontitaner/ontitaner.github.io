@@ -112,14 +112,20 @@ python -m pytest -q -p no:cacheprovider lab
 
 ```powershell
 python -m pip install ".[figures]"
+python figures/scripts/fig_arch_decision.py            # 01 架构决策
+python figures/scripts/fig_measurement_planes.py      # 03 测量平面
 python figures/scripts/fig_data_misalignment_impact.py  # 04 错拍与能力误判
+python figures/scripts/fig_ocv_calibration.py         # 06 OCV 标定
 python figures/scripts/fig_ocv_slope.py               # 07 OCV 斜率
 python figures/scripts/fig_ocv_decision_map.py        # 07 OCV 校准决策
 python figures/scripts/fig_ecm_pulse.py               # 08 ECM 脉冲响应
 python figures/scripts/fig_identify.py                # 09 参数辨识
 python figures/scripts/fig_soh_capacity.py            # 10 容量标定
+python figures/scripts/fig_initial_soc.py             # 12 初始 SOC
 python figures/scripts/fig_coulomb_drift.py           # 14 开环漂移
 python figures/scripts/fig_open_loop_error_components.py  # 14 开环误差分解
+python figures/scripts/fig_self_discharge.py          # 15 自放电
+python figures/scripts/fig_soc_calibration.py         # 16 SOC 校准
 python figures/scripts/fig_ekf_convergence.py         # 17 EKF 收敛
 python figures/scripts/fig_ekf_update_explained.py    # 17 单次更新分解
 python figures/scripts/fig_uncertainty_band.py        # 18–19 协方差/能量带
