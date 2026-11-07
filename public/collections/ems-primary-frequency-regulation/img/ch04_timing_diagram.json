@@ -1,0 +1,19 @@
+{
+  "_comment": "@AI_GENERATED",
+  "figure": "ch04_timing_diagram.png",
+  "numbers": [
+    0.1,
+    0.8,
+    0.9,
+    1.0,
+    1.01,
+    2.0,
+    5.0,
+    5.8500000000000005,
+    6.97,
+    8.0,
+    12.0,
+    15.0
+  ],
+  "_comment_end": "@AI_GENERATED: end"
+}
