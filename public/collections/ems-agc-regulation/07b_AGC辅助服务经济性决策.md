@@ -285,4 +285,6 @@ SOC 回归的"功率损失" vs "里程收入增加"：
 
 </details>
 
+> 💻 **动手实验**：运行 `python lab/ch07b_economics.py` 对比不同评分、不同 KP、不同月调频电量下容量 vs 里程补偿的盈亏平衡点。
+
 <!-- @AI_GENERATED: end -->

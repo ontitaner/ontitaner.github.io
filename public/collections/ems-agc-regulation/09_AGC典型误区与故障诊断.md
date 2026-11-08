@@ -209,4 +209,6 @@ flowchart TB
 
 </details>
 
+> 💻 **动手实验**：运行 `python lab/ch09_diagnostics.py` 模拟调度目标→EMS 下发→PCS 采集三份数据的逐段对齐诊断，快速定位 EMS 侧 vs PCS 侧偏差根因。
+
 <!-- @AI_GENERATED: end -->

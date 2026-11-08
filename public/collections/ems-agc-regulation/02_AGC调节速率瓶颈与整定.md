@@ -305,4 +305,6 @@ P_total = clamp(P_agc_base + ΔP_primary, P_min, P_max)
 
 </details>
 
+> 💻 **动手实验**：运行 `python lab/ch02_ramp_rate.py` 复现本章三级校验逻辑（调度要求 K1→EMS 安全→PCS 硬件），验证 K1 瓶颈定位与 4-PCS 并行场景。
+
 <!-- @AI_GENERATED: end -->

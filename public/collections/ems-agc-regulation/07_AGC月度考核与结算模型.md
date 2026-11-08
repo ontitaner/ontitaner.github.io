@@ -300,4 +300,6 @@ flowchart TB
 
 </details>
 
+> 💻 **动手实验**：运行 `python lab/ch07_scoring.py` 重现 K1/K2/K3 综合评分卡，对比容量补偿与里程补偿在统一 80 分基线下的月度收入差距。
+
 <!-- @AI_GENERATED: end -->

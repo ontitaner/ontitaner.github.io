@@ -228,4 +228,6 @@ flowchart LR
 
 </details>
 
+> 💻 **动手实验**：运行 `python lab/ch08_testing.py` 仿真阶跃响应 K1/K2/K3 自检与调度-EMS 参数一致性校验，验证"验收不过就查这三个维度"。
+
 <!-- @AI_GENERATED: end -->

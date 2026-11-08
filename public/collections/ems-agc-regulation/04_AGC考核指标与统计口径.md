@@ -271,4 +271,6 @@ stateDiagram-v2
 
 </details>
 
+> 💻 **动手实验**：运行 `python lab/ch04_k2_budget.py` 逐节检验 104 轮询→EMS 解析→分配→下发→PCS 响应→出力到达的 K2 时序预算，对比三区域达标差异与最差轮询场景。
+
 <!-- @AI_GENERATED: end -->

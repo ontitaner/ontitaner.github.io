@@ -339,4 +339,6 @@ K1_total  = ΔP_total(T) / T（取 T 为 AGC 考核窗口如 1 min）
 
 </details>
 
+> 💻 **动手实验**：运行 `python lab/ch03_allocation.py` 用风光储混合场站复现四种分配策略（容量/可调/成本/SOC），对比上调 20MW 与下调 15MW 场景下各策略的输出差异。
+
 <!-- @AI_GENERATED: end -->

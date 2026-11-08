@@ -225,4 +225,6 @@ flowchart TB
 
 </details>
 
+> 💻 **动手实验**：运行 `python lab/ch05_regional.py` 对比华东/东北/山西三套区域参数对同一 PCS 的 K1 达标判定差异，验证"参数是电网结构的投影"。
+
 <!-- @AI_GENERATED: end -->

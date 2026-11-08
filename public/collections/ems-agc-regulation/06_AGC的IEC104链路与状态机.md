@@ -383,4 +383,6 @@ AGC 记录比一次调频多了"指令"维度：
 
 </details>
 
+> 💻 **动手实验**：运行 `python lab/ch06_full_chain.py` 演示死区→ramp 约束→分配→限幅→下发全链路流水线，对比 avail_cap 与 soc_first 模式在 3-BESS 场站的分配差异。
+
 <!-- @AI_GENERATED: end -->
