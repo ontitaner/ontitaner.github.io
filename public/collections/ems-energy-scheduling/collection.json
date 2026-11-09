@@ -1,0 +1,10 @@
+{
+  "_comment": "@AI_GENERATED",
+  "name": "储能能量管理与经济调度：从分时电价到日前优化排程的决策闭环",
+  "order": 24,
+  "description": "面向储能/新能源场站EMS开发者的能量调度工程教程：覆盖峰谷套利、需量管理、光储协同、SOC/SOP可行域、日前优化排程、日内滚动、现货报价、辅助服务叠加与收益复盘全链路",
+  "icon": "💰",
+  "level": "进阶",
+  "cover": "img/cover.png",
+  "_comment_end": "@AI_GENERATED: end"
+}
