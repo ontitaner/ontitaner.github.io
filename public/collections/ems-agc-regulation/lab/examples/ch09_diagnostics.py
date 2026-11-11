@@ -2,12 +2,20 @@
 """ch09 AGC 离线纠偏与根因定位 — 自诊断 lab。
 
 模拟 EMS 采集→调度下发→104 回送全链路数据逆推分析。
-运行方式: python lab/ch09_diagnostics.py
+运行方式: python lab/examples/ch09_diagnostics.py
 """
 from __future__ import annotations
 
 import sys
-sys.path.insert(0, ".")
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
 from dataclasses import dataclass
 from typing import List
 

@@ -3,12 +3,20 @@
 
 原样复制教材代码块（Resource dataclass + 四策略函数），
 用教材示例（光伏/风电/储能）补运行输出与自测。
-运行方式: python lab/ch03_allocation.py
+运行方式: python lab/examples/ch03_allocation.py
 """
 from __future__ import annotations
 
 import sys
-sys.path.insert(0, ".")
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
 from dataclasses import dataclass
 from typing import List, Optional
 

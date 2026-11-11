@@ -3,13 +3,23 @@
 
 原样复制教材 k2_budget_check()，用教材示例（轮询=4s, K2=30s）
 演示逐节延迟累加：104轮询→EMS解析→死区判定→下发→PCS响应→出力到达。
-运行方式: python lab/ch04_k2_budget.py
+运行方式: python lab/examples/ch04_k2_budget.py
 """
 from __future__ import annotations
 
 import sys
-sys.path.insert(0, ".")
-from lab.agc_core import k1_rating, k2_rating, k3_rating, composite_score, Region, REGION_PARAMS
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
+from ems_lab.agc_core import (  # noqa: E402
+    k1_rating, k2_rating, k3_rating, composite_score, Region, REGION_PARAMS,
+)
 
 
 # ── 教材原样代码 ───────────────────────────────────────

@@ -1,0 +1,145 @@
+# @AI_GENERATED
+"""第 02 章配图：K1 调节速率多级限速瓶颈（三级取最小）+ 逐层修复后的瓶颈上移。
+
+全篇唯一业务对象：华东某 100 MW / 200 MWh 储能电站（4 台 25 MW PCS）。
+全篇唯一业务事件：邻省 600 MW 机组跳闸后省调下发 AGC「上调 50 MW」。
+所有参数均为 [教学示例]，不可直接用于现场整定。
+
+数据与正文 02 章「参数一：调节速率 K1」手算逐字一致：
+  调度要求 K1 = 1.0 Pn/min = 1.67 MW/s（留 20% 余量则三层均需 ≥ 2.0 MW/s）
+  现场当前配置：PCS 硬件 0.8 / EMS 安全限速 1.0 / 分配模块合成 1.2（MW/s）
+  三级取最小值：min(0.8, 1.0, 1.2) = 0.8 MW/s = 0.48 Pn/min → 卡在 PCS 硬件
+"""
+from __future__ import annotations
+
+import numpy as np
+
+from _style import (C_K1, C_ACC, C_OK, C_LIMIT, C_GRID,
+                    manifest, save, plt)
+
+PN = 100.0                   # MW
+K1_PN_PER_MIN = 1.0          # Pn/min（调度要求）
+K1_MW_PER_S = K1_PN_PER_MIN * PN / 60  # 1.67 MW/s
+MARGIN = 1.2                 # 20% 安全余量
+TARGET = K1_MW_PER_S * MARGIN  # 2.0 MW/s（三层均需抬到此值）
+
+PCS = 0.8     # MW/s（4 台 × 0.2）
+EMS = 1.0     # MW/s
+ALLOC = 1.2   # MW/s
+
+
+def fig_k1_bottleneck():
+    """三级限速取最小值：三根柱取最矮，虚线为调度要求。"""
+    labels = ["PCS 硬件\n(4 台 × 0.2)", "EMS 安全限速", "分配模块合成"]
+    vals = [PCS, EMS, ALLOC]
+    colors = [C_K1, C_ACC, C_OK]
+
+    fig, ax = plt.subplots(figsize=(7.5, 5.4))
+    x = np.arange(len(labels))
+    bars = ax.bar(x, vals, 0.5, color=colors, alpha=0.92)
+
+    # 调度要求虚线
+    ax.axhline(K1_MW_PER_S, color=C_LIMIT, ls="--", lw=2.0,
+               label=f"调度要求 K1 = 1.0 Pn/min = {K1_MW_PER_S:.2f} MW/s")
+
+    for xi, v in zip(x, vals):
+        ax.text(xi, v + 0.05, f"{v:.1f}", ha="center", va="bottom",
+                fontsize=11, fontweight="bold", color="black")
+
+    # 最矮柱（PCS）加粗边框，突出瓶颈
+    bars[0].set_edgecolor(C_LIMIT)
+    bars[0].set_linewidth(2.6)
+
+    ax.annotate("min(0.8, 1.0, 1.2) = 0.8 MW/s\n实际 K1 被卡在 PCS 硬件",
+                xy=(0.0, PCS), xytext=(1.18, 0.48),
+                arrowprops=dict(arrowstyle="->", color=C_LIMIT),
+                fontsize=9, color=C_LIMIT,
+                bbox=dict(fc="white", ec=C_LIMIT, alpha=0.95))
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, fontsize=10)
+    ax.set_ylabel("限速值 (MW/s)")
+    ax.set_ylim(0, 2.2)
+    ax.set_yticks([0, 0.5, 1.0, 1.67, 2.0])
+    ax.set_title("K1 三级限速取最小值：min(0.8, 1.0, 1.2) = 0.8 MW/s（卡 PCS 硬件）",
+                 fontsize=11)
+    ax.legend(loc="upper left", fontsize=8)
+    ax.text(0.5, -0.14, "三根柱取最矮，不是相加、也不是平均——最矮那根就是实际 K1",
+            transform=ax.transAxes, ha="center", fontsize=8.5, color=C_GRID)
+
+    manifest("ch02_k1_bottleneck",
+             vals + [K1_MW_PER_S, TARGET, 0.48, 0.2])
+    save(fig, "ch02_k1_bottleneck")
+
+
+def fig_k1_repair():
+    """逐层修复后的瓶颈上移：当前→修PCS→修EMS→全修，四组取各自最矮。"""
+    groups = ["当前", "修 PCS", "修 EMS", "全修"]
+    pcs_vals = [0.8, 2.0, 2.0, 2.0]
+    ems_vals = [1.0, 1.0, 2.0, 2.0]
+    alloc_vals = [1.2, 1.2, 1.2, 2.0]
+    mins = [0.8, 1.0, 1.2, 2.0]
+    min_labels = ["卡 PCS 硬件", "卡 EMS 限速", "卡分配合成", "达标"]
+
+    fig, ax = plt.subplots(figsize=(9.0, 5.8))
+    x = np.arange(len(groups))
+    width = 0.24
+
+    b1 = ax.bar(x - width, pcs_vals, width, color=C_K1, label="PCS 硬件")
+    b2 = ax.bar(x, ems_vals, width, color=C_ACC, label="EMS 安全限速")
+    b3 = ax.bar(x + width, alloc_vals, width, color=C_OK, label="分配模块合成")
+
+    ax.axhline(K1_MW_PER_S, color=C_LIMIT, ls="--", lw=2.0,
+               label=f"调度要求 K1 = {K1_MW_PER_S:.2f} MW/s")
+
+    # 每根柱数值标注
+    for bars in (b1, b2, b3):
+        for r in bars:
+            v = r.get_height()
+            ax.text(r.get_x() + r.get_width() / 2, v + 0.03, f"{v:.1f}",
+                    ha="center", va="bottom", fontsize=8, fontweight="bold")
+
+    # 每组最矮柱加粗边框（全修组达标则全绿框）
+    for i in range(len(groups)):
+        if i < 3:
+            jmin = int(np.argmin([pcs_vals[i], ems_vals[i], alloc_vals[i]]))
+            [b1[i], b2[i], b3[i]][jmin].set_edgecolor(C_LIMIT)
+            [b1[i], b2[i], b3[i]][jmin].set_linewidth(2.4)
+        else:
+            for b in (b1[i], b2[i], b3[i]):
+                b.set_edgecolor(C_OK)
+                b.set_linewidth(2.0)
+
+    # 每组顶部标注该组的 min 结果
+    for i in range(len(groups)):
+        ok = i == 3
+        c = C_OK if ok else C_LIMIT
+        ax.text(x[i], 2.34, f"min={mins[i]:.1f} MW/s", ha="center",
+                fontsize=10, fontweight="bold", color=c)
+        ax.text(x[i], 2.15, min_labels[i], ha="center", fontsize=8, color=c)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(groups, fontsize=10)
+    ax.set_ylabel("限速值 (MW/s)")
+    ax.set_ylim(0, 2.7)
+    ax.set_yticks([0, 0.5, 1.0, 1.67, 2.0])
+    ax.set_title("逐层修复后的瓶颈上移：最矮那层会动态换人", fontsize=11)
+    ax.legend(loc="lower left", fontsize=8)
+    ax.text(0.5, -0.12,
+            "从左到右看每组最矮柱：PCS(0.8) → EMS(1.0) → 分配(1.2) → 全修(2.0 ≥ 1.67 达标)",
+            transform=ax.transAxes, ha="center", fontsize=8.5, color=C_GRID)
+
+    manifest("ch02_k1_repair",
+             [0.8, 1.0, 1.2, 2.0, K1_MW_PER_S, TARGET])
+    save(fig, "ch02_k1_repair")
+
+
+def main():
+    print("[ch02_k1_ramp]")
+    fig_k1_bottleneck()
+    fig_k1_repair()
+
+
+if __name__ == "__main__":
+    main()
+# @AI_GENERATED: end

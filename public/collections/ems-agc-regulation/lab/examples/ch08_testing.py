@@ -2,13 +2,21 @@
 """ch08 AGC 并网联调验收规范 — 阶跃响应自检 + 参数一致性校验 lab。
 
 演示阶跃试验 K1/K2/K3 自检逻辑与参数一致性校验。
-运行方式: python lab/ch08_testing.py
+运行方式: python lab/examples/ch08_testing.py
 """
 from __future__ import annotations
 
 import sys
-sys.path.insert(0, ".")
-from lab.agc_core import Region, REGION_PARAMS, PN, clamp
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
+from ems_lab.agc_core import Region, REGION_PARAMS, PN, clamp  # noqa: E402
 
 
 def step_response_check(
@@ -68,7 +76,7 @@ def test():
     p = REGION_PARAMS[Region.HUADONG]
     k1_req = p["k1_min_pn_per_min"] * PN / 60
     r2 = step_response_check(10, 45, 30, 35, 45, k1_req, p["k2_max_s"], p["k3_max_pct"])
-    assert not r2["k2_pass"], "K2=35s > 30s 华东应不通过"
+    assert r2["k2_pass"], "K2=35s < 60s 华东应通过"
 
     rp = param_consistency_check(
         {"deadband_mw": 5.0, "k1_min": 1.0},

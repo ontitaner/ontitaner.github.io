@@ -3,12 +3,20 @@
 
 原样复制教材代码（AgcConfig/Resource/agc_allocate/clamp），
 用教材示例演示死区→ramp约束→分配→限幅→下发全链路。
-运行方式: python lab/ch06_full_chain.py
+运行方式: python lab/examples/ch06_full_chain.py
 """
 from __future__ import annotations
 
 import sys
-sys.path.insert(0, ".")
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
 from dataclasses import dataclass, field
 from typing import List
 
@@ -109,12 +117,12 @@ def build_resources() -> List[Resource]:
 
 def test():
     resources = build_resources()
-    cfg = AgcConfig(pn_mw=100, alloc_mode="avail_cap", dt_s=4)
+    cfg = AgcConfig(pn_mw=100, alloc_mode="avail_cap")
 
     r = agc_allocate(p_target_mw=40.0, resources=resources,
                      p_current_total=40.0, cfg=cfg, dt_s=4.0)
-    assert all(v == r.resources_p_current if 'resources_p_current' in locals()
-               else r[rname] == 20 for rname in ["BESS_A"])
+    # 40.0 − 40.0 = 0 落入死区（±0.3 MW），应原样返回当前功率
+    assert r["BESS_A"] == 20.0, "死区内应保持当前功率"
     print("  ✓ 完整分配流水线自测通过")
 
 
