@@ -20,7 +20,8 @@ from ems_lab.agc_core import (  # noqa: E402
     PN, W_K1, W_K2, W_K3, Region, clamp, ace,
     k1_rating, k2_rating, k3_rating, composite_score, score_card,
     capacity_revenue, mileage_revenue, k2_chain_budget, check_ramp_rate_multilevel,
-    should_track,
+    should_track, Resource, allocate_by_capacity, allocate_by_available,
+    allocate_by_cost, allocate_by_soc, dynamic_supplement,
 )
 
 B = 1000.0  # 01 章教学示例频率偏差系数

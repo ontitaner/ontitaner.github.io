@@ -5,6 +5,6 @@
   "description": "面向储能/新能源场站EMS开发者的AVC工程教程：覆盖控制模式选型、PI整定、多资源无功分配、考核口径对齐与并网联调全链路",
   "icon": "⚡",
   "level": "进阶",
-  "cover": "img/ems-avc-regulation-cover.png",
+  "cover": "img/cover.png",
   "_comment_end": "@AI_GENERATED: end"
 }

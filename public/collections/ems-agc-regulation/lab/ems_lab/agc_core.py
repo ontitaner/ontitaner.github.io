@@ -197,8 +197,15 @@ def k2_chain_budget(poll_period_s: float = 4.0,
                     alloc_calc_s: float = 0.5,
                     ems_to_pcs_s: float = 0.5,
                     pcs_response_s: float = 1.0,
-                    reach_threshold_s: float = 3.0) -> dict:
-    """K2 端到端时序预算（正文 04 章「K2 的时间预算」表逐项对应）。"""
+                    reach_threshold_s: float = 3.0,
+                    k2_limit_s: float = 30.0) -> dict:
+    """K2 端到端时序预算（正文 04 章「K2 的时间预算」表逐项对应）。
+
+    默认轮询 4s（东北配置）、K2 限值 30s：
+    合计 = 4+0.5+0.5+0.5+1+3 = 9.5s，余量 20.5s（68.3%），pass=True。
+    返回 margin_s/margin_pct/pass 供 04 章 example 与 tests 复用，
+    避免 example 层自复制一套 k2_budget_check。
+    """
     chain = {
         "104轮询（最差=轮询周期）": poll_period_s,
         "EMS解析+校验": ems_parse_s,
@@ -208,9 +215,14 @@ def k2_chain_budget(poll_period_s: float = 4.0,
         "出力到达阈值": reach_threshold_s,
     }
     total = sum(chain.values())
+    margin = k2_limit_s - total
     return {
         "chain_detail": chain,
         "total_s": round(total, 2),
+        "k2_limit_s": k2_limit_s,
+        "margin_s": round(margin, 2),
+        "margin_pct": round((1 - total / k2_limit_s) * 100, 1),
+        "pass": total <= k2_limit_s,
         "biggest_risk": max(chain, key=chain.get),
     }
 
@@ -249,13 +261,119 @@ def should_track(p_new: float, p_prev: float, deadband_mw: float) -> bool:
     return abs(p_new - p_prev) >= deadband_mw
 
 
-def allocate_by_available(resources: List, dp: float) -> dict:
-    """按实时可调容量分配（正文 03 章策略二，上调场景）。
+@dataclass
+class Resource:
+    """AGC 受控资源（正文 03 章四种分配策略）。
 
-    边界：总可调容量为 0 时返回零分配（不抛异常，由调用方告警）。
+    soc：储能 SOC ∈ [0,1]；非储能填 -1.0（无 SOC，哨兵值，用于区分储能）。
     """
-    available = {r.name: max(0.0, r.p_max - r.p_current) for r in resources}
-    total = sum(available.values())
+    name: str
+    pn: float            # 额定功率 (MW)
+    p_current: float     # 当前出力 (MW)
+    p_max: float         # 出力上限 (MW)
+    p_min: float         # 出力下限（含 SOC 约束）(MW)
+    ramp_rate: float     # 爬坡速率 (MW/s)
+    cost_up: float       # 上调边际成本 (元/MW)
+    cost_down: float     # 下调边际成本 (元/MW)
+    soc: float = -1.0    # 储能 SOC（非储能 -1.0）
+
+
+def allocate_by_capacity(resources: List, dp: float) -> dict:
+    """按额定容量等比例分配（正文 03 章策略一）。
+
+    边界：总额定容量为 0 时返回零分配（不抛异常）。
+    """
+    total_pn = sum(r.pn for r in resources)
+    if total_pn <= 0:
+        return {r.name: 0.0 for r in resources}
+    return {r.name: dp * r.pn / total_pn for r in resources}
+
+
+def allocate_by_available(resources: List, dp: float) -> dict:
+    """按实时可调容量分配（正文 03 章策略二，方向感知）。
+
+    dp > 0：按上调空间（p_max − p_current）；
+    dp < 0：按下调空间（p_current − p_min）。
+    边界：总可调空间为 0 时返回零分配（不抛异常，由调用方告警）。
+    """
+    if dp > 0:
+        avail = {r.name: max(0.0, r.p_max - r.p_current) for r in resources}
+    else:
+        avail = {r.name: max(0.0, r.p_current - r.p_min) for r in resources}
+    total = sum(avail.values())
     if total <= 0:
         return {r.name: 0.0 for r in resources}
-    return {r.name: dp * available[r.name] / total for r in resources}
+    return {r.name: dp * avail[r.name] / total for r in resources}
+
+
+def allocate_by_cost(resources: List, dp: float) -> dict:
+    """按边际成本分配（正文 03 章策略三，上调场景：cost_up 低的优先）。
+
+    边界：cost_up 并列时按传入顺序；总可调容量不足时按可调容量截断；
+    dp <= 0（下调）不在本函数范围，直接返回零分配。
+    """
+    result = {r.name: 0.0 for r in resources}
+    if dp <= 0:
+        return result
+    remaining = dp
+    for r in sorted(resources, key=lambda r: r.cost_up):
+        avail = max(0.0, r.p_max - r.p_current)
+        alloc = min(avail, remaining)
+        result[r.name] = alloc
+        remaining -= alloc
+        if remaining <= 0:
+            break
+    return result
+
+
+def allocate_by_soc(resources: List, dp: float,
+                    soc_low: float = 0.2, soc_high: float = 0.8) -> dict:
+    """SOC 优先分配（正文 03 章策略四）。
+
+    上调（dp>0）：SOC > soc_low 的储能优先放电；不足时风光按可调容量承担。
+    下调（dp<0）：SOC < soc_high 的储能优先充电；不足时风光按可调空间承担。
+    多个储能按 |soc − 0.5| 由近及远排序（中位回归偏好）。
+    """
+    storage = [r for r in resources if r.soc >= 0.0]
+    others = [r for r in resources if r.soc < 0.0]
+    result = {r.name: 0.0 for r in resources}
+    remaining = dp
+
+    if dp > 0:
+        active = [s for s in storage if s.soc > soc_low]
+    else:
+        active = [s for s in storage if s.soc < soc_high]
+
+    for s in sorted(active, key=lambda r: abs(r.soc - 0.5)):
+        if dp > 0:
+            avail = max(0.0, s.p_max - s.p_current)
+            alloc = min(avail, remaining)
+        else:
+            avail = max(0.0, s.p_current - s.p_min)
+            alloc = max(-avail, remaining)
+        result[s.name] = alloc
+        remaining -= alloc
+        done = remaining <= 0.0 if dp > 0 else remaining >= 0.0
+        if done:
+            return result
+
+    # 储能不够/不可用 → 风光按可调空间承担
+    for name, v in allocate_by_available(others, remaining).items():
+        result[name] = v
+    return result
+
+
+def dynamic_supplement(target_mw: dict, actual_mw: dict, resources: List,
+                       threshold_mw: float = 0.5) -> dict:
+    """动态补差（正文 03 章「动态补差逻辑」）。
+
+    偏差 = Σ(目标 − 实际)；|偏差| >= threshold_mw 才触发补差，
+    缺口按实时可调容量重分配（调用 allocate_by_available，方向由偏差正负决定）。
+    低于门槛返回全零（不触发，避免频繁微调振荡）。
+    threshold_mw 对应正文「补差门槛 <0.5% Pn」：100 MW 场站即 0.5 MW。
+    """
+    total_dev = sum(target_mw.get(r.name, 0.0) - actual_mw.get(r.name, 0.0)
+                    for r in resources)
+    if abs(total_dev) < threshold_mw:
+        return {r.name: 0.0 for r in resources}
+    return allocate_by_available(resources, total_dev)
