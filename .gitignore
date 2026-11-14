@@ -9,3 +9,4 @@ next-env.d.ts
 tsconfig.tsbuildinfo
 # @AI_GENERATED: end
 __pycache__/
+public/collections/*/output/
