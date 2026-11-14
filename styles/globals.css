@@ -2570,7 +2570,7 @@ body[data-immersive="on"] .doc-header { max-width: 960px; margin-left: auto; mar
 
 .collection-poster-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(16px, 2vw, 28px);
   align-items: start;
 }
