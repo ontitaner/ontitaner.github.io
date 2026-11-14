@@ -6,7 +6,7 @@
 
 **一句话**：K1/K2/K3 不是三个独立指标，而是时间轴上三个串行检查点——收到指令到开始动（K2）、开始动到动到位（K1）、到位后不准了多少（K3）。哪个环节有短板，K3（占 50% 权重）都会放大。
 
-## 现场场景【必读】
+## 现场场景【必懂】
 
 AGC 考核月报出来了，K1 合格、K2 合格、K3 差 0.3% 没达标。你觉得 0.3% Pn（对 100 MW 场站就是 0.3 MW）不该是问题，但查了原始数据发现：
 
@@ -80,36 +80,22 @@ T_start_move：场站出力开始可靠变化的时刻（出力变化 ≥ 某阈
 
 > **结论**：在正常情况下，K2 的 30 s 限值并不紧张。K2 的真正威胁不是"走得慢"，而是"根本不动"——指令死区过大或 104 断链。
 
-> 💻 **代码落地**——K2 时序预算检查（EMS 配置阶段执行）：
+> 💻 **代码落地**——K2 时序预算检查（EMS 配置阶段执行），关键片段：
 >
 > ```python
-> def k2_budget_check(config: dict, k2_limit_s: float = 30) -> dict:
->     """各环节耗时累加，验证是否在 K2 限值内"""
->     chain = {
->         "104轮询（最差=轮询周期）": config.get("poll_period_s", 4),
->         "EMS解析+校验":             0.5,
->         "死区判定+分配计算":         0.5,
->         "EMS→PCS下发":              0.5,
->         "PCS内部响应":              1.0,
->         "出力到达阈值":             3.0,
->     }
->     total = sum(chain.values())
->     return {
->         "chain_detail":   chain,
->         "total_s":        total,
->         "k2_limit_s":     k2_limit_s,
->         "margin_s":       k2_limit_s - total,
->         "margin_pct":     round((1 - total/k2_limit_s) * 100, 1),
->         "pass":           total <= k2_limit_s,
->         "biggest_risk":   max(chain, key=chain.get)  # 最大贡献项
->     }
+def k2_chain_budget(poll_period_s=4.0, k2_limit_s=30.0):
+    chain = {"104轮询": poll_period_s, "EMS解析": 0.5, "死区+分配": 0.5,
+             "EMS→PCS": 0.5, "PCS响应": 1.0, "到达阈值": 3.0}
+    total = sum(chain.values())            # total=9.5s
+    return {"chain_detail": chain, "total_s": total,
+            "margin_s": k2_limit_s - total, "pass": total <= k2_limit_s}
+```
 >
-> # 示例：东北 K2=30s, 轮询=4s
-> # → total=4+0.5+0.5+0.5+1+3=9.5s, margin=20.5s (68.3%), pass=✅
-> # 最大贡献项 = "104轮询" — 这是 K2 预算中唯一不可控的大头
-> ```
+> 完整实现（含余量/占比/最大风险项定位）：[agc_core.py](lab/ems_lab/agc_core.py) · 端到端演示：[ch04_k2_budget.py](lab/examples/ch04_k2_budget.py)
+>
+> 示例：东北 K2=30s、轮询=4s → `total = 4+0.5+0.5+0.5+1+3 = 9.5s`，余量 20.5s（68.3%）；最大贡献项 = "104轮询"，这是 K2 预算中唯一不可控的大头。
 
-![AGC K2 响应时间链路延迟预算：T_cmd → T_start 各阶段耗时，储能限值 3 s 红色竖线，水电限值 5 s 灰色参考](img/ch04_k2_response.png)
+![AGC K2 响应时间：6 环节时序预算合计 9.5s（104轮询 4s + 解析 0.5 + 分配 0.5 + 下发 0.5 + PCS响应 1 + 到达阈值 3），限值 30s、余量 20.5s，最大贡献项=104轮询](img/ch04_k2_response.png)
 
 ### 104 轮询周期对 K2 的数学影响
 
@@ -167,7 +153,7 @@ flowchart LR
 
 参见 [02 章](02_AGC调节速率瓶颈与整定.md)的叠加陷阱。
 
-![AGC K1 调节速率：调度阶跃指令 50→80 MW + 实际出力 ramp rate 1.2 MW/s 响应曲线，K1 = 29/(25.5−2) = 1.28 MW/s](img/ch04_k1_ramp.png)
+![AGC K1 调节速率：多级限速取最小值（调度要求 1.67 MW/s=1.0 Pn/min，EMS安全/分配/PCS 各留 20% 余量 ≥2.0 MW/s）](img/ch04_k1_ramp.png)
 
 ---
 
@@ -202,7 +188,7 @@ P_actual_ss：指令执行后达到稳态时的实际出力
 2. EMS 用同样的窗口统计内部 K3，定期与调度对账；
 3. 不要用滚动平均上送实际出力——用**瞬时值**或**与调度同窗口的平均值**。
 
-![AGC K3 调节精度：左图 30 控制周期稳态偏差分布（绿色达标/红色超标）、右图 K3 得分函数曲线（限值 3% Pn，K3=2% 标注）](img/ch04_k3_precision.png)
+![AGC K3 调节精度：稳态偏差分布与三级限值带（±3% Pn=±3 MW、±2% Pn=±2 MW、±1% Pn=±1 MW）](img/ch04_k3_precision.png)
 
 ### K3 失分的三种模式
 
@@ -271,6 +257,6 @@ stateDiagram-v2
 
 </details>
 
-> 💻 **动手实验**：运行 `python lab/ch04_k2_budget.py` 逐节检验 104 轮询→EMS 解析→分配→下发→PCS 响应→出力到达的 K2 时序预算，对比三区域达标差异与最差轮询场景。
+> 💻 **动手实验**：运行 `python lab/examples/ch04_k2_budget.py` 逐节检验 104 轮询→EMS 解析→分配→下发→PCS 响应→出力到达的 K2 时序预算，对比三区域达标差异与最差轮询场景。
 
 <!-- @AI_GENERATED: end -->

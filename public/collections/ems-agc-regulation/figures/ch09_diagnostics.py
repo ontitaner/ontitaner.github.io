@@ -7,12 +7,12 @@ from __future__ import annotations
 
 import numpy as np
 
-from _style import (C_K1, C_K2, C_K3, C_GRID, C_LIMIT, C_OK, C_ACC, C_PURPLE, C_DIS, C_CHG,
+from _style import (C_K1, C_K2, C_K3, C_GRID, C_LIMIT, C_OK, C_ACC, C_PURPLE, C_CHG,
                     IMG_DIR, manifest, save, plt)
 
 
 def fig_failure_attribution():
-    """四类故障的 K1/K2/K3 得分降幅对比 + 时域波形 + 诊断决策树"""
+    """四类故障的 K1/K2/K3 得分降幅对比 + 时域波形（诊断决策树已移至正文 Mermaid）。"""
     w1, w2, w3 = 0.30, 0.20, 0.50
 
     # 故障定义
@@ -25,10 +25,9 @@ def fig_failure_attribution():
     scenarios = [base, f1, f2, f3, f4]
     n = len(scenarios)
 
-    fig, axes = plt.subplots(1, 3, figsize=(16, 5.5), width_ratios=[1.1, 1, 1.15])
+    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(15, 6), width_ratios=[1.12, 1])
 
     # 左图：分组柱状图 + 综合评分
-    ax = axes[0]
     x = np.arange(n)
     width = 0.22
 
@@ -46,20 +45,19 @@ def fig_failure_attribution():
         loss = baseline_total - total
 
         color = C_OK if total >= 80 else C_LIMIT
-        ax.text(i, 100, f"{total:.0f} 分", ha="center", fontsize=9.5, fontweight="bold", color=color)
+        ax.text(i, 100, f"{total:.0f} 分", ha="center", fontsize=10, fontweight="bold", color=color)
         if i > 0 and loss > 0.5:
-            ax.text(i, 92, f"-{loss:.1f}", ha="center", fontsize=7.5, color=C_LIMIT)
+            ax.text(i, 92, f"-{loss:.1f}", ha="center", fontsize=8, color=C_LIMIT)
 
     ax.axhline(80, color=C_LIMIT, ls="--", lw=1.8, label="合格线 80 分")
     ax.set_xticks(x)
-    ax.set_xticklabels([s["label"] for s in scenarios], fontsize=7.8)
-    ax.set_ylabel("单指标得分")
-    ax.set_title("四类故障 K1/K2/K3 得分对比", fontsize=10)
-    ax.legend(loc="lower right", fontsize=7.5)
+    ax.set_xticklabels([s["label"] for s in scenarios], fontsize=9)
+    ax.set_ylabel("单指标得分", fontsize=11)
+    ax.set_title("四类故障 K1/K2/K3 得分对比", fontsize=12, pad=12)
+    ax.legend(loc="lower right", fontsize=8, framealpha=0.9)
     ax.set_ylim(0, 110)
 
-    # 中图：故障时域波形对比（模拟 60 控制周期）
-    ax2 = axes[1]
+    # 右图：故障时域波形对比（模拟 60 控制周期）
     t_periods = np.arange(1, 61)
     target = 70.0
     rng = np.random.default_rng(42)
@@ -74,7 +72,7 @@ def fig_failure_attribution():
     # 故障四：公式错误，偏差放大
     p_formula = target + rng.normal(0.5, 1.2, 60)
 
-    ax2.plot(t_periods, p_base, color=C_OK, lw=2, label="基准 正常")
+    ax2.plot(t_periods, p_base, color=C_OK, lw=2.2, label="基准 正常")
     ax2.plot(t_periods, p_dead, color=C_K2, lw=1.5, ls="--", alpha=0.85, label="故障一 死区(间歇)")
     ax2.plot(t_periods, p_soc_high, color=C_CHG, lw=1.5, ls="-.", alpha=0.85, label="故障三 SOC偏高(系统性)")
     ax2.plot(t_periods, p_formula, color=C_LIMIT, lw=1.5, ls=":", alpha=0.85, label="故障四 公式错误(离散)")
@@ -87,67 +85,28 @@ def fig_failure_attribution():
     # 标注异常特征
     ax2.annotate("间歇不跟踪\n→ K2 恶化", xy=(20, p_dead[19]),
                 xytext=(5, target + 8),
-                arrowprops=dict(arrowstyle="->", color=C_K2), fontsize=7, color=C_K2,
+                arrowprops=dict(arrowstyle="->", color=C_K2), fontsize=7.5, color=C_K2,
                 bbox=dict(fc="white", ec=C_K2, alpha=0.85, boxstyle="round"))
     ax2.annotate("系统性偏高\n→ K3 恶化", xy=(40, p_soc_high[39]),
                 xytext=(45, target - 5),
-                arrowprops=dict(arrowstyle="->", color=C_CHG), fontsize=7, color=C_CHG,
+                arrowprops=dict(arrowstyle="->", color=C_CHG), fontsize=7.5, color=C_CHG,
                 bbox=dict(fc="white", ec=C_CHG, alpha=0.85, boxstyle="round"))
     ax2.annotate("离散度大\n→ K3 恶化", xy=(55, p_formula[54]),
                 xytext=(48, target + 7),
-                arrowprops=dict(arrowstyle="->", color=C_LIMIT), fontsize=7, color=C_LIMIT,
+                arrowprops=dict(arrowstyle="->", color=C_LIMIT), fontsize=7.5, color=C_LIMIT,
                 bbox=dict(fc="white", ec=C_LIMIT, alpha=0.85, boxstyle="round"))
 
-    ax2.set_xlabel("控制周期")
-    ax2.set_ylabel("出力 (MW)")
-    ax2.set_title("时域波形特征对比  [Pn=100 MW, 60周期]", fontsize=10)
-    ax2.legend(fontsize=6.5, loc="upper right")
+    ax2.set_xlabel("控制周期", fontsize=11)
+    ax2.set_ylabel("出力 (MW)", fontsize=11)
+    ax2.set_title("时域波形特征对比  [Pn=100 MW, 60周期]", fontsize=12, pad=12)
+    ax2.legend(fontsize=7.5, loc="upper right", framealpha=0.9)
     ax2.set_xlim(0, 60)
 
-    # 右图：诊断决策树（流程图式）
-    ax3 = axes[2]
-    ax3.axis("off")
-    ax3.set_xlim(0, 10)
-    ax3.set_ylim(0, 10)
-
-    # 决策树节点
-    nodes = [
-        (5, 9.3, "AGC 评分不达标\n总分 < 80", C_LIMIT, 10, "start"),
-        (2.3, 7.8, "K3 大幅下降？\n(K3<50 分)", C_K3, 8.5, "left"),
-        (7.7, 7.8, "K2 大幅下降？\n(K2<50 分)", C_K2, 8.5, "right"),
-        (1.2, 6.2, "系统性偏置？\n(均值偏离)", C_CHG, 7.5, "left"),
-        (3.5, 6.2, "离散度大？\n(方差大)", C_LIMIT, 7.5, "right"),
-        (6.5, 6.2, "间歇性丢包？\n(104 t1/t2超时)", C_K2, 7.5, "left"),
-        (8.8, 6.2, "不跟踪比例？\n(死区过大)", C_K2, 7.5, "right"),
-        (1.2, 4.5, "→ SOC 超高\n限充电方向", C_CHG, 7, "left"),
-        (3.5, 4.5, "→ 公式/权重\n与调度不一致", C_LIMIT, 7, "right"),
-        (6.5, 4.5, "→ 104通道\n冗余切换失败", C_ACC, 7, "left"),
-        (8.8, 4.5, "→ 死区过大\n指令不跟踪", C_PURPLE, 7, "right"),
-    ]
-
-    for xc, yc, text, color, size, side in nodes:
-        ax3.text(xc, yc, text, ha="center", va="center", fontsize=size, color=color, fontweight="bold",
-                bbox=dict(fc="white", ec=color, alpha=0.9, boxstyle="round", pad=0.3))
-
-    # 连线
-    arrows = [
-        (5, 9.0, 2.3, 8.1, C_GRID), (5, 9.0, 7.7, 8.1, C_GRID),
-        (2.3, 7.5, 1.2, 6.5, C_GRID), (2.3, 7.5, 3.5, 6.5, C_GRID),
-        (7.7, 7.5, 6.5, 6.5, C_GRID), (7.7, 7.5, 8.8, 6.5, C_GRID),
-        (1.2, 5.9, 1.2, 4.8, C_CHG), (3.5, 5.9, 3.5, 4.8, C_LIMIT),
-        (6.5, 5.9, 6.5, 4.8, C_ACC), (8.8, 5.9, 8.8, 4.8, C_PURPLE),
-    ]
-    for x1, y1, x2, y2, c in arrows:
-        ax3.annotate("", xy=(x2, y2), xytext=(x1, y1),
-                    arrowprops=dict(arrowstyle="->", color=c, lw=1.2, connectionstyle="arc3,rad=0"))
-
-    ax3.set_title("AGC 评分异常诊断决策树", fontsize=10)
-
-    fig.suptitle("AGC 典型故障根因诊断：评分从哪里丢的？评分+波形+决策树三维立体诊断  [教学示例]",
-                 fontsize=12, y=1.03)
+    fig.suptitle("AGC 典型故障根因诊断：评分从哪里丢的？评分对比 + 时域波形  [教学示例]",
+                 fontsize=13, y=1.02)
     fig.text(0.5, -0.02,
              "诊断逻辑：总分<80 → 定位受损指标(K1/K2/K3) → 检查系统性偏置/离散度/通信/死区 → 根因锁定",
-             ha="center", fontsize=8, color=C_GRID)
+             ha="center", fontsize=8.5, color=C_GRID)
 
     totals = [w1 * s["K1"] + w2 * s["K2"] + w3 * s["K3"] for s in scenarios]
     manifest("ch09_failure_attribution",

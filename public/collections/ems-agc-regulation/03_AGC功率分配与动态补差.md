@@ -29,7 +29,7 @@ EMS 按"等比例容量"分配：光伏分 8 MW、风电分 6 MW、储能分 6 M
 > ⏱ **三段速读**：
 > - 5 分钟：读现场场景故事 → 看四种策略优缺点对照表（本章末尾有汇总）→ 知道选哪种
 > - 15 分钟：加读"动态补差逻辑"的 mermaid 图 → 理解"分完≠结束"
-> - 写代码：精读补差分配的三个约束 + SOC 中位回归算法
+> - 30 分钟：精读补差分配的三个约束 + SOC 中位回归算法
 
 ## 本章目标
 
@@ -242,89 +242,21 @@ K1_total  = ΔP_total(T) / T（取 T 为 AGC 考核窗口如 1 min）
 
 ---
 
-> 💻 **代码落地**——四种策略的核心实现骨架：
+> 💻 **代码落地**——四种策略的核心逻辑，关键片段：
 >
 > ```python
-> from dataclasses import dataclass
-> from typing import List, Optional
+> # 策略二 按可调容量：有能力的多分
+> def allocate_by_available(resources, dp):
+>     avail = {r.name: max(0, r.p_max - r.p_current) for r in resources}
+>     return {r.name: dp * avail[r.name] / sum(avail.values()) for r in resources}
 >
-> @dataclass
-> class Resource:
->     name: str
->     pn: float           # 额定功率 (MW)
->     p_current: float    # 当前出力 (MW)
->     p_max: float        # 出力上限 (MW)
->     p_min: float        # 出力下限（含 SOC 约束）(MW)
->     ramp_rate: float    # 爬坡速率 (MW/s)
->     cost_up: float      # 上调边际成本 (元/MW)
->     cost_down: float    # 下调边际成本 (元/MW)
->     soc: float = 0.5    # 储能 SOC（非储能填 0.5）
+> # 策略四 SOC 优先：储能离 50% 中位最近的先分，缺额转非储能
+> storage.sort(key=lambda r: abs(r.soc - 0.5))
 >
-> def allocate_by_capacity(resources: List[Resource], dp: float) -> dict:
->     """策略一：按额定容量等比例"""
->     total_pn = sum(r.pn for r in resources)
->     return {r.name: dp * r.pn / total_pn for r in resources}
->
-> def allocate_by_available(resources: List[Resource], dp: float) -> dict:
->     """策略二：按实时可调容量（上调场景）"""
->     available = {r.name: max(0, r.p_max - r.p_current) for r in resources}
->     total = sum(available.values())
->     if total == 0:
->         # 边界条件：无可调容量 → 返回零分配 + 告警
->         return {r.name: 0.0 for r in resources}
->     return {r.name: dp * available[r.name] / total for r in resources}
->
-> def allocate_by_cost(resources: List[Resource], dp: float
->                      ) -> dict:
->     """策略三：按边际成本（上调场景：成本低的优先多分）"""
->     sorted_res = sorted(resources, key=lambda r: r.cost_up)
->     result, remaining = {}, dp
->     for r in sorted_res:
->         avail = max(0, r.p_max - r.p_current)
->         alloc = min(avail, remaining)
->         result[r.name] = alloc
->         remaining -= alloc
->         if remaining <= 0:
->             break
->     return result
->
-> def allocate_by_soc(resources: List[Resource], dp: float) -> dict:
->     """策略四：SOC 优先（储能优先承担，SOC 中位回归）"""
->     storage = [r for r in resources if r.soc > 0]
->     others = [r for r in resources if r.soc <= 0]
->     result = {r.name: 0.0 for r in resources}
->
->     # 储能优先：距离 SOC=50% 最近的优先分配
->     storage.sort(key=lambda r: abs(r.soc - 0.5))
->     remaining = dp
->     for s in storage:
->         avail = max(0, s.p_max - s.p_current) if dp > 0 else max(0, s.p_current - s.p_min)
->         alloc = min(avail, remaining)
->         result[s.name] = alloc
->         remaining -= alloc
->         if remaining <= 0:
->             return result
->
->     # 储能不够 → 按可调容量分配给非储能资源
->     return {**result, **allocate_by_available(others, remaining)}
+> # 策略三 按成本：cost 升序，低的优先吃满；策略一 按容量：dp * pn / Σpn
 > ```
 >
-> 调用示例（直接用现场场景数字）：
-> ```python
-> resources = [
->     Resource("光伏", pn=40, p_current=30, p_max=40, p_min=0,
->              ramp_rate=0.5, cost_up=0, cost_down=0.5),
->     Resource("风电", pn=30, p_current=20, p_max=30, p_min=0,
->              ramp_rate=0.3, cost_up=0, cost_down=0),
->     Resource("储能", pn=30, p_current=0,  p_max=20, p_min=0,
->              ramp_rate=2.0, cost_up=0.1, cost_down=-0.05, soc=0.45),
-> ]
-> dp = 20  # AGC 要求上调 20 MW
-> print("按容量:", allocate_by_capacity(resources, dp))
-> print("按可调:", allocate_by_available(resources, dp))
-> print("按成本:", allocate_by_cost(resources, dp))
-> print("按SOC:",  allocate_by_soc(resources, dp))
-> ```
+> 完整实现（含 `Resource` 数据类、四种策略、动态补差）：[agc_core.py](lab/ems_lab/agc_core.py) · 端到端演示：[ch03_allocation.py](lab/examples/ch03_allocation.py) · 断言：[test_agc_core.py](lab/tests/test_agc_core.py)
 
 ---
 

@@ -46,7 +46,7 @@ def simulate_step(pn, target_start, target_end, t_cmd, t_recv, t_start, ramp_rat
 
 
 def fig_step_response_test():
-    """联调试验二：三场景阶跃响应对比（上调/下调/小幅）+ K1K2K3 评估矩阵"""
+    """联调试验二：三场景阶跃响应对比（上调/下调/小幅）+ 单场景放大详图 + 达标判定热力图"""
     pn = 100.0
 
     # 场景 A: 上调 +17.7 MW（52.3→70），ramp 1.2 MW/s
@@ -65,10 +65,11 @@ def fig_step_response_test():
         t, p_cmd, p_act, t_end, k1, k2, k3 = simulate_step(pn, s, e, cmd, recv, start, ramp)
         results.append((t, p_cmd, p_act, t_end, k1, k2, k3, label))
 
-    fig, axes = plt.subplots(2, 2, figsize=(14, 9), gridspec_kw={"height_ratios": [1.2, 1]})
+    fig = plt.figure(figsize=(14, 8.5))
+    gs = fig.add_gridspec(2, 2, height_ratios=[1.15, 1], hspace=0.34, wspace=0.26)
 
-    # 左上：三场景叠加对比
-    ax = axes[0, 0]
+    # 顶部（全宽）：三场景叠加对比
+    ax = fig.add_subplot(gs[0, :])
     colors = [C_OK, C_ACC, C_PURPLE]
     styles = ["-", "--", "-."]
 
@@ -95,36 +96,14 @@ def fig_step_response_test():
     ax.set_xlim(0, 30)
     ax.set_ylim(47, 78)
 
-    # 右上：K1/K2/K3 雷达式评估矩阵（3×3 标准化得分）
-    ax2 = axes[0, 1]
+    # K1/K2/K3 单项得分与综合评分（供右下热力图使用）
     k1_scores = [min(100, 100 * r[4] / 1.0) for r in results]
     k2_scores = [max(0, 100 * (1 - r[5] / 30.0)) for r in results]
     k3_scores = [max(0, 100 * (1 - r[6] / 3.0)) for r in results]
     totals = [0.3 * k1 + 0.2 * k2 + 0.5 * k3 for k1, k2, k3 in zip(k1_scores, k2_scores, k3_scores)]
 
-    x = np.arange(3)
-    width = 0.22
-    ax2.bar(x - width, k1_scores, width, color=C_K1, alpha=0.85, label="K1 (w=30%)", edgecolor="white")
-    ax2.bar(x, k2_scores, width, color=C_K2, alpha=0.85, label="K2 (w=20%)", edgecolor="white")
-    ax2.bar(x + width, k3_scores, width, color=C_K3, alpha=0.85, label="K3 (w=50%)", edgecolor="white")
-
-    for i, (k1, k2, k3, tot) in enumerate(zip(k1_scores, k2_scores, k3_scores, totals)):
-        ax2.text(i, 105, f"{tot:.1f} 分", ha="center", fontsize=11, fontweight="bold",
-                 color=C_OK if tot >= 80 else C_LIMIT)
-        ax2.text(i - width, k1 + 2, f"{k1:.0f}", ha="center", fontsize=7.5, color=C_K1)
-        ax2.text(i, k2 + 2, f"{k2:.0f}", ha="center", fontsize=7.5, color=C_K2)
-        ax2.text(i + width, k3 + 2, f"{k3:.0f}", ha="center", fontsize=7.5, color=C_K3)
-
-    ax2.axhline(80, color=C_LIMIT, ls="--", lw=1.5, label="合格线 80")
-    ax2.set_xticks(x)
-    ax2.set_xticklabels(["上调\n17.7MW", "下调\n15MW", "小幅\n5MW"], fontsize=9)
-    ax2.set_ylabel("单项得分")
-    ax2.set_title("K1/K2/K3 评估矩阵  [华东权重]", fontsize=10)
-    ax2.legend(fontsize=7.5, loc="lower right")
-    ax2.set_ylim(0, 120)
-
     # 左下：单场景放大（上调 52.3→70 MW），含全部标注
-    ax3 = axes[1, 0]
+    ax3 = fig.add_subplot(gs[1, 0])
     t, p_cmd, p_act, t_end, k1, k2, k3, label = results[0]
 
     ax3.step(t, p_cmd, where="post", color=C_GRID, lw=2.2, ls="--", label="调度 AGC 指令")
@@ -177,7 +156,7 @@ def fig_step_response_test():
     ax3.set_ylim(48, 78)
 
     # 右下：三场景 K1/K2/K3 达标判定矩阵（热力图）
-    ax4 = axes[1, 1]
+    ax4 = fig.add_subplot(gs[1, 1])
     criteria = ["K1 速率\n(≥1.0 MW/s)", "K2 响应\n(≤3s 储能)", "K3 精度\n(≤3% Pn)", "综合评分\n(≥80 分)"]
     scen_labels = ["上调 17.7MW", "下调 15MW", "小幅 5MW"]
 
@@ -222,121 +201,67 @@ def fig_step_response_test():
 
 
 def fig_evidence_chain():
-    """四时刻证据链：甘特图时间线 + 多场景对齐 + 证据溯源表"""
-    fig, axes = plt.subplots(1, 3, figsize=(14, 5), width_ratios=[1.2, 0.9, 0.8])
-
-    # 左图：四时刻证据链甘特图（同原来但增强标注）
-    ax = axes[0]
+    """四时刻证据链：单面板全宽甘特图时间线（标签沿事件点两侧阶梯排布，避免左侧拥挤）。"""
+    fig, ax = plt.subplots(1, 1, figsize=(14, 5.2))
 
     events = [
-        ("调度主站下发\nP_target=70 MW\n14:30:00.000\nGPS时标锁定", 0, 0.0, C_PURPLE),
-        ("EMS 接收\n校验+死区判定\n14:30:00.200\n通信≤200ms", 0.20, 0.2, C_ACC),
-        ("PCS 开始动作\n出力52.3→爬坡\n14:30:00.500\n启机≤300ms", 0.50, 0.5, C_K2),
-        ("进入稳态\n出力=70.1 MW\n14:30:15.200\nK3=0.1% Pn", 15.20, 15.2, C_OK),
+        ("调度主站下发 · T_cmd\nP_target=70 MW · 14:30:00.000", 0.0, C_PURPLE, +0.45, "left"),
+        ("EMS 接收 · T_recv\n14:30:00.200 · 通信≤200ms", 0.2, C_ACC, +0.45, "left"),
+        ("PCS 开始动作 · T_start\n14:30:00.500 · 启机≤300ms", 0.5, C_K2, +0.45, "left"),
+        ("进入稳态 · T_end\n14:30:15.200", 15.2, C_OK, -0.45, "right"),
     ]
 
     y_positions = [3, 2, 1, 0]
 
-    for (label, start_t, _, color), y in zip(events, y_positions):
-        ax.barh(y, 0.15, left=start_t, color=color, alpha=0.85, height=0.55, edgecolor="white")
-        ax.text(start_t - 0.2, y, label, ha="right", va="center", fontsize=7.5,
-                bbox=dict(fc="white", ec=color, alpha=0.88, boxstyle="round"))
-        ax.axvline(start_t, color=color, ls=":", lw=1, alpha=0.4)
+    # K2 / K1 时间区竖向色带（下沉至最底层）
+    ax.axvspan(0, 0.5, color=C_K2, alpha=0.08, zorder=0)
+    ax.axvspan(0.5, 15.2, color=C_K1, alpha=0.05, zorder=0)
 
-    # K2 区
-    ax.axhspan(-0.8, 3.8, xmin=0/16, xmax=0.5/16, color=C_K2, alpha=0.08)
-    ax.annotate(f"K2 = 0.5 - 0 = 0.5 s\n（达标 OK）", xy=(0.25, 2.2),
-                fontsize=9.5, color=C_K2, ha="center", fontweight="bold",
-                bbox=dict(fc="white", ec=C_K2, alpha=0.9, boxstyle="round"))
+    # 事件车道（浅灰横线）+ 事件点 + 阶梯标签
+    for (label, start_t, color, dx, ha), y in zip(events, y_positions):
+        ax.hlines(y, 0, 15.2, color=C_GRID, lw=0.8, alpha=0.35, zorder=1)
+        ax.plot([start_t, start_t], [y - 0.3, y + 0.3], color=color, lw=1.3, zorder=4)
+        ax.plot(start_t, y, "o", color=color, markersize=9, zorder=5,
+                markeredgecolor="white", markeredgewidth=1.5)
+        ax.text(start_t + dx, y, label, ha=ha, va="center", fontsize=9.5,
+                color="#2b2d33", zorder=6,
+                bbox=dict(fc="white", ec=color, alpha=0.92, boxstyle="round,pad=0.35"))
 
-    # K1 区
-    ax.axhspan(-0.8, 3.8, xmin=0.5/16, xmax=15.2/16, color=C_K1, alpha=0.06)
-    ax.annotate("K1 = 17.7÷14.7 = 1.20 MW/s\n（达标 OK）", xy=(7.8, 2.2),
-                fontsize=9.5, color=C_K1, ha="center", fontweight="bold",
-                bbox=dict(fc="white", ec=C_K1, alpha=0.9, boxstyle="round"))
+    # K2 标注（顶部左侧，指向 0→0.5 s 响应区）
+    ax.annotate("K2 = 0.5 − 0 = 0.5 s\n（达标 OK）",
+                xy=(0.25, 3.35), xytext=(2.9, 4.45), fontsize=10,
+                color=C_K2, ha="center", fontweight="bold",
+                arrowprops=dict(arrowstyle="->", color=C_K2),
+                bbox=dict(fc="white", ec=C_K2, alpha=0.95, boxstyle="round,pad=0.4"))
 
-    # K3 标注
-    ax.annotate(f"K3 = |70.1−70|÷100 = 0.1% Pn\n（达标 OK）", xy=(15.2, -0.5),
-                fontsize=8.5, color=C_K3, ha="right", va="bottom",
-                bbox=dict(fc="white", ec=C_K3, alpha=0.9, boxstyle="round"))
+    # K1 标注（顶部居中，指向 0.5→15.2 s 爬坡区）
+    ax.annotate("K1 = (70−52.3)/(15.2−0.5)\n   = 17.7/14.7 = 1.20 MW/s（达标）",
+                xy=(7.85, 3.35), xytext=(7.85, 4.45), fontsize=10,
+                color=C_K1, ha="center", fontweight="bold",
+                arrowprops=dict(arrowstyle="->", color=C_K1),
+                bbox=dict(fc="white", ec=C_K1, alpha=0.95, boxstyle="round,pad=0.4"))
 
-    # 通信延迟预算标注
-    ax.annotate("通信延迟\n≤200ms", xy=(0.2, 2.5), xytext=(0.05, 3.5),
-                arrowprops=dict(arrowstyle="->", color=C_ACC), fontsize=7, color=C_ACC,
-                bbox=dict(fc="white", ec=C_ACC, alpha=0.85, boxstyle="round"))
+    # K3 标注（底部右侧，指向 T_end 稳态点）
+    ax.annotate("K3 = |70.1−70|/100 = 0.1% Pn\n（达标 OK）",
+                xy=(15.2, 0.28), xytext=(15.2, -1.45), fontsize=10,
+                color=C_K3, ha="center", fontweight="bold",
+                arrowprops=dict(arrowstyle="->", color=C_K3),
+                bbox=dict(fc="white", ec=C_K3, alpha=0.95, boxstyle="round,pad=0.4"))
 
     ax.set_yticks([])
     ax.set_xlabel("时间 (s, 从 T_cmd 起算)")
-    ax.set_title("四时刻证据链 (GPS 时标对账)", fontsize=10)
-    ax.set_xlim(-2.0, 16.5)
-    ax.set_ylim(-1, 4.2)
+    ax.set_title("四时刻证据链 (GPS 时标对账)", fontsize=12)
+    ax.set_xlim(-1.0, 16.8)
+    ax.set_ylim(-1.9, 5.2)
 
-    # 中图：时标对齐核查表（表格形式）
-    ax2 = axes[1]
-    ax2.axis("off")
-
-    table_data = [
-        ["时刻", "来源", "时标", "偏差", "判定"],
-        ["T_cmd", "调度主站", "14:30:00.000", "—", "基准"],
-        ["T_recv", "EMS日志", "14:30:00.200", "+200 ms", "OK"],
-        ["T_start", "PCS录波", "14:30:00.500", "+500 ms", "OK"],
-        ["T_end", "稳态判定", "14:30:15.200", "+15.2 s", "OK"],
-        ["T_sample", "调度采样", "14:31:00.000", "+60 s", "K3=0.1%"],
-    ]
-
-    table = ax2.table(cellText=table_data, cellLoc="center", loc="center",
-                       colWidths=[0.15, 0.18, 0.22, 0.15, 0.12])
-    table.auto_set_font_size(False)
-    table.set_fontsize(7.5)
-    table.scale(1, 1.5)
-
-    # 着色
-    for i in range(len(table_data)):
-        for j in range(5):
-            cell = table[i, j]
-            if i == 0:
-                cell.set_facecolor(C_GRID)
-                cell.set_text_props(color="white", fontweight="bold")
-            elif j == 4 and table_data[i][j] == "OK":
-                cell.set_facecolor("#d4edda")
-                cell.set_text_props(color=C_OK, fontweight="bold")
-            elif i == 5:
-                cell.set_facecolor("#e8f5e9")
-
-    ax2.set_title("时标对齐核查表 (多方证据溯源)", fontsize=10, y=0.98)
-
-    # 右图：证据类型与保存要求
-    ax3 = axes[2]
-    ax3.axis("off")
-
-    evidence_items = [
-        ("调度指令\n日志截图", "必须", C_PURPLE, "含GPS时标\n指令值+时刻"),
-        ("PCS录波\n曲线", "必须", C_OK, "≥4通道\n有功+无功+频率"),
-        ("EMS事件\n记录", "必须", C_K3, "含t1/t2/t3\n超时告警"),
-        ("稳态区间\n统计数据", "必须", C_K2, "均值+标准差\n≥30周期"),
-        ("104报文\n抓包", "建议", C_ACC, "Wireshark\n含时标字段"),
-        ("时钟同步\n校验记录", "必须", C_LIMIT, "NTP/GPS\n偏差<10ms"),
-    ]
-
-    for i, (name, required, color, detail) in enumerate(evidence_items):
-        y = 0.88 - i * 0.15
-        req_color = C_LIMIT if required == "必须" else C_ACC
-        ax3.text(0.02, y, f"● {name}", fontsize=8, color=color, fontweight="bold",
-                 transform=ax3.transAxes)
-        ax3.text(0.35, y, f"[{required}]", fontsize=7.5, color=req_color, fontweight="bold",
-                 transform=ax3.transAxes)
-        ax3.text(0.55, y, detail, fontsize=7, color=C_GRID, transform=ax3.transAxes)
-
-    ax3.set_title("联调证据清单 (6类)", fontsize=10)
-
-    fig.suptitle("AGC 联调四时刻证据链——时标对账 + 多方溯源 + 证据清单  [14:30:00.000 起, 教学示例]",
-                 fontsize=12, y=1.03)
+    fig.suptitle("AGC 联调四时刻证据链——GPS 时标对账  [14:30:00.000 起, 教学示例]",
+                 fontsize=12.5, y=1.02)
     fig.text(0.5, -0.02,
              "K2 = 0.5s OK  |  K1 = 1.20 MW/s OK  |  K3 = 0.1% Pn OK  |  全链路时标闭环可追溯",
              ha="center", fontsize=9, color=C_GRID)
 
     manifest("ch08_evidence_chain",
-             [0.0, 0.2, 0.5, 15.2, 0.5, 1.20, 0.1, 70.0, 52.3, 70.1, 100, 14.5, 30, 60, 200, 300, 10])
+             [0.0, 0.2, 0.5, 15.2, 0.5, 1.20, 0.1, 70.0, 52.3, 70.1, 100, 17.7, 14.7, 200, 300])
     save(fig, "ch08_evidence_chain")
 
 

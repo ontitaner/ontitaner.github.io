@@ -5,5 +5,6 @@
   "description": "ACE计算与TBC/FFC/FTC控制模式选型、K1/K2/K3性能指标测算与考核结算、多资源AGC功率分配策略、IEC104指令链路与EMS状态机实现、并网联调试验与辅助服务市场经济性决策",
   "icon": "📡",
   "level": "进阶",
+  "cover": "img/cover.png",
   "_comment_end": "@AI_GENERATED: end"
 }

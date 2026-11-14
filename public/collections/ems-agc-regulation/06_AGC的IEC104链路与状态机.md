@@ -6,7 +6,7 @@
 
 **一句话**：AGC 在 EMS 里怎么落地的？三件事：104 链路收指令、五级流水线处理指令、状态机管投退。任一环出 bug 都会直接反映到考核分数上——链路断影响投运率，流水线缺校验导致 K1/K2/K3 失分，状态机逻辑错让调度以为你离线。
 
-## 现场场景【必读】
+## 现场场景【必懂】
 
 凌晨 4:15，调度发来告警：你场站的 AGC 投运状态变成了"退出"。查 104 链路日志：4:12 时 t1 超时（连接空闲超过 60 秒未测试→调度侧主动断开→EMS 侧链路重建）。
 
@@ -17,7 +17,7 @@
 > ⏱ **三段速读**：
 > - 5 分钟：读现场场景 → 理解 t1 超时怎么导致投运率扣分
 > - 15 分钟：加读五级流水线 mermaid + t1/t2/t3 定时器对照表 → 能排查链路问题
-> - 写代码：精读 `agc_allocate()` 完整实现 + 边界条件注释 → 直接复用
+> - 30 分钟：精读 `agc_allocate()` 完整实现 + 边界条件注释 → 直接复用
 
 ## 本章目标
 
@@ -58,7 +58,7 @@ flowchart LR
 
 ### 三个关键定时器
 
-参见 [ individuals/一次调频课程/06 章](file:///d:/ontitaner/ai-practice/sub_module/ontitaner.github.io/public/collections/ems-primary-frequency-regulation/06_EMS侧实现.md) 的通信协议部分，AGC 共用同一条 104 链路：
+参见 [一次调频课程 06 章](../ems-primary-frequency-regulation/06_PFR控制链路实现.md) 的通信协议部分，AGC 共用同一条 104 链路：
 
 | 参数 | 含义 | 推荐值 | 对 AGC 的影响 |
 |---|---|---|---|
@@ -117,25 +117,20 @@ AGC 指令通常走 104 的**遥控**或**遥调**通道：
 ### 危险的反模式
 
 ```python
-# 反模式：无条件接受
-def on_agc_cmd(p_target):
-    dispatch(p_target)  # 直接下发
+# 反模式：无条件接受 → 直接下发（危险）
+def on_agc_cmd(p_target): dispatch(p_target)
 
-# 正确做法
-def on_agc_cmd(p_target):
-    if not is_valid_range(p_target, p_min, p_max):
-        log_and_alert("agc_cmd_out_of_range", p_target)
-        return
-    if not is_valid_ramp(p_target, p_prev, ramp_limit):
-        p_target = clamp_to_ramp(p_target, p_prev, ramp_limit)
-    dispatch(p_target)
+# 正确：先校验范围、ramp，不合格拒绝或裁剪
+if not is_valid_range(p_target, p_min, p_max): return alert("越限")
+if not is_valid_ramp(p_target, p_prev, ramp_limit): p_target = clamp_to_ramp(...)
+dispatch(p_target)
 ```
 
 ---
 
 ## 指令死区判定【必懂】
 
-[02 章](02_AGC调节速率K1限速瓶颈与整定.md)和[04 章](04_AGC考核指标与统计口径.md)多次提到指令死区。具体实现：
+[02 章](02_AGC调节速率瓶颈与整定.md)和[04 章](04_AGC考核指标与统计口径.md)多次提到指令死区。具体实现：
 
 ```text
 if |P_target − P_current_target| ≤ deadband:
@@ -179,93 +174,20 @@ flowchart TB
     F --> G["下发各 PCS"]
 ```
 
-### 代码示例
+### 关键代码片段
 
 ```python
-from dataclasses import dataclass, field
-from typing import List
-
-
-@dataclass
-class AgcConfig:
-    pn_mw: float = 100.0
-    p_min_mw: float = 0.0
-    p_max_mw: float = 100.0
-    ramp_limit_pn_per_min: float = 1.2   # EMS 限速
-    cmd_deadband_mw: float = 0.3
-    alloc_mode: str = "avail_cap"         # cap / avail_cap / soc_first
-
-
-@dataclass
-class Resource:
-    name: str
-    pn_mw: float
-    p_current_mw: float
-    p_min_mw: float
-    p_max_mw: float
-    ramp_up_mw_per_s: float
-    ramp_down_mw_per_s: float
-    soc_pct: float = 50.0
-
-
-def agc_allocate(p_target_mw: float, resources: List[Resource],
-                 p_current_total: float, cfg: AgcConfig, dt_s: float):
+def agc_allocate(p_target_mw, resources, p_current_total, cfg, dt_s):
     delta_total = p_target_mw - p_current_total
-
-    # ① 指令死区
-    if abs(delta_total) <= cfg.cmd_deadband_mw:
+    if abs(delta_total) <= cfg.cmd_deadband_mw:          # ① 死区：不跟踪
         return {r.name: r.p_current_mw for r in resources}
-
-    # ② ramp 约束
     max_delta = cfg.ramp_limit_pn_per_min * cfg.pn_mw * dt_s / 60.0
-    delta_total = max(-max_delta, min(delta_total, max_delta))
-
-    # ③ 分配
-    allocations = {}
-    if cfg.alloc_mode == "avail_cap":
-        avail = {r.name: (r.p_max_mw - r.p_current_mw) if delta_total > 0
-                 else (r.p_current_mw - r.p_min_mw) for r in resources}
-        total_avail = sum(avail.values())
-        if total_avail == 0:
-            # [注意] 生产代码此处应记录告警日志并触发"零可调容量"事件
-            return {r.name: r.p_current_mw for r in resources}
-        for r in resources:
-            share = delta_total * avail[r.name] / total_avail
-            allocations[r.name] = clamp(r.p_current_mw + share,
-                                         r.p_min_mw, r.p_max_mw)
-
-    elif cfg.alloc_mode == "soc_first":
-        # SOC 优先：上调时优先低 SOC→高 SOC，下调时相反
-        sorted_res = sorted(resources,
-            key=lambda r: r.soc_pct if delta_total > 0 else -r.soc_pct)
-        remaining = delta_total
-        for r in sorted_res:
-            if delta_total > 0:
-                max_delta_i = min(r.p_max_mw - r.p_current_mw,
-                                  r.ramp_up_mw_per_s * dt_s)
-            else:
-                max_delta_i = min(r.p_current_mw - r.p_min_mw,
-                                  r.ramp_down_mw_per_s * dt_s)
-            alloc = max(-max_delta_i, min(remaining,
-                       max_delta_i)) if delta_total > 0 else \
-                    max(-max_delta_i, min(remaining,
-                       -max_delta_i) if delta_total < 0 else 0)
-            allocations[r.name] = r.p_current_mw + alloc
-            remaining -= alloc
-            if abs(remaining) < 0.001:
-                break
-        # [注意] 循环结束后 remaining 可能 ≠ 0（尾部资源全被限幅），
-        # 生产代码应触发"AGC 无法完全分配"告警，标记差额 = remaining
-
-    # ④ [建议] 生产代码应验证：sum(allocations) − p_current_total ≈ delta_total
-    # 若偏差 > 0.01 MW，记录"分配偏差"并触发告警
-
+    delta_total = max(-max_delta, min(delta_total, max_delta))   # ② ramp 裁剪
+    # ③ 分配：avail_cap / soc_first 按资源可调容量或 SOC 排序分给各资源并限幅
     return allocations
-
-
-def clamp(value, min_val, max_val):
-    return max(min_val, min(value, max_val))
 ```
+
+> 完整实现（含 `AgcConfig`/`Resource` 数据类、avail_cap 与 soc_first 两种分配分支、零可调容量告警、分配偏差校验）：[ch06_full_chain.py](lab/examples/ch06_full_chain.py) · 断言：[test_agc_core.py](lab/tests/test_agc_core.py)
 
 ---
 
@@ -315,7 +237,7 @@ AGC 从"暂停"恢复到"投入"时，可能收到与当前出力差距很大的
 
 ## 与一次调频的指令合成【必懂】
 
-参见 [02 章](02_AGC调节速率K1限速瓶颈与整定.md) 的参数四部分。核心规则：
+参见 [02 章](02_AGC调节速率瓶颈与整定.md) 的参数四部分。核心规则：
 
 ```text
 P_total = clamp(P_agc_base + ΔP_primary, P_min, P_max)
@@ -383,6 +305,6 @@ AGC 记录比一次调频多了"指令"维度：
 
 </details>
 
-> 💻 **动手实验**：运行 `python lab/ch06_full_chain.py` 演示死区→ramp 约束→分配→限幅→下发全链路流水线，对比 avail_cap 与 soc_first 模式在 3-BESS 场站的分配差异。
+> 💻 **动手实验**：运行 `python lab/examples/ch06_full_chain.py` 演示死区→ramp 约束→分配→限幅→下发全链路流水线，对比 avail_cap 与 soc_first 模式在 3-BESS 场站的分配差异。
 
 <!-- @AI_GENERATED: end -->

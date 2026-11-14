@@ -1,8 +1,9 @@
 # @AI_GENERATED
 """ch04 AGC 考核指标与统计口径 — K2 时序预算 lab。
 
-原样复制教材 k2_budget_check()，用教材示例（轮询=4s, K2=30s）
-演示逐节延迟累加：104轮询→EMS解析→死区判定→下发→PCS响应→出力到达。
+复用 agc_core.k2_chain_budget（正文 04 章「K2 的时间预算」表），
+用教材示例（轮询=4s, K2=30s）演示逐节延迟累加：
+104轮询→EMS解析→死区判定→下发→PCS响应→出力到达。
 运行方式: python lab/examples/ch04_k2_budget.py
 """
 from __future__ import annotations
@@ -17,56 +18,30 @@ try:
 except Exception:
     pass
 
-from ems_lab.agc_core import (  # noqa: E402
-    k1_rating, k2_rating, k3_rating, composite_score, Region, REGION_PARAMS,
-)
-
-
-# ── 教材原样代码 ───────────────────────────────────────
-
-def k2_budget_check(config: dict, k2_limit_s: float = 30) -> dict:
-    """各环节耗时累加，验证是否在 K2 限值内"""
-    chain = {
-        "104轮询（最差=轮询周期）": config.get("poll_period_s", 4),
-        "EMS解析+校验":             0.5,
-        "死区判定+分配计算":         0.5,
-        "EMS→PCS下发":              0.5,
-        "PCS内部响应":              1.0,
-        "出力到达阈值":             3.0,
-    }
-    total = sum(chain.values())
-    return {
-        "chain_detail":   chain,
-        "total_s":        total,
-        "k2_limit_s":     k2_limit_s,
-        "margin_s":       k2_limit_s - total,
-        "margin_pct":     round((1 - total/k2_limit_s) * 100, 1),
-        "pass":           total <= k2_limit_s,
-        "biggest_risk":   max(chain, key=chain.get)
-    }
+from ems_lab.agc_core import k2_chain_budget  # noqa: E402
 
 
 # ── 教材示例 ────────────────────────────────────────────
 
 def demo_textbook_example():
     """教材示例：东北 K2=30s, 轮询=4s → total=9.5s, pass=✓"""
-    return k2_budget_check({"poll_period_s": 4}, k2_limit_s=30)
+    return k2_chain_budget(poll_period_s=4.0, k2_limit_s=30.0)
 
 
 def demo_worst_case():
     """最差场景：轮询提高到 10s"""
-    return k2_budget_check({"poll_period_s": 10}, k2_limit_s=30)
+    return k2_chain_budget(poll_period_s=10.0, k2_limit_s=30.0)
 
 
 def demo_all_regions():
-    """三区域 K2 达标测试"""
+    """三区域 K2 达标测试（限值与正文 05 章 REGION_PARAMS 一致）"""
     configs = [
-        ("华东 K2≤30s, 轮询=4s", {"poll_period_s": 4}, 30),
-        ("东北 K2≤45s, 轮询=5s", {"poll_period_s": 5}, 45),
-        ("山西 K2≤25s, 轮询=4s", {"poll_period_s": 4}, 25),
-        ("东北 K2=30s 假设, 轮询=4s", {"poll_period_s": 4}, 30),
+        ("华东 K2≤60s, 轮询=8s", 8.0, 60.0),
+        ("东北 K2≤30s, 轮询=4s", 4.0, 30.0),
+        ("山西 K2≤60s, 轮询=8s", 8.0, 60.0),
     ]
-    return [(label, k2_budget_check(cfg, limit)) for label, cfg, limit in configs]
+    return [(label, k2_chain_budget(poll_period_s=poll, k2_limit_s=limit))
+            for label, poll, limit in configs]
 
 
 # ── 自测 ────────────────────────────────────────────────
@@ -90,7 +65,7 @@ def test():
 
 def main():
     print("=" * 60)
-    print("ch04 K2 响应时间逐节预算 — k2_budget_check()")
+    print("ch04 K2 响应时间逐节预算 — k2_chain_budget()")
     print("=" * 60)
 
     r = demo_textbook_example()

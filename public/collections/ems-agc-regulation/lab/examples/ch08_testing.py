@@ -20,26 +20,26 @@ from ems_lab.agc_core import Region, REGION_PARAMS, PN, clamp  # noqa: E402
 
 
 def step_response_check(
-    p_start_mw: float, p_end_mw: float,
-    t_rise_s: float, t_settle_s: float,
-    p_target_mw: float,
+    p_start_mw: float, p_target_mw: float, p_actual_ss_mw: float,
+    t_response_s: float, t_ramp_s: float,
     k1_required: float, k2_required_s: float, k3_required_pct: float,
+    pn_mw: float = PN,
 ) -> dict:
-    """阶跃响应试验自检。
+    """阶跃响应试验自检（正文 08 章四时刻证据链口径）。
 
-    Args:
-        p_start_mw: 起始功率
-        p_end_mw: 终点功率
-        t_rise_s: 上升时间（到达 90% 的时间）
-        t_settle_s: 稳定时间（进入 ±2% 稳态带的时间）
-        p_target_mw: 目标功率
+    输入参数与正文四时刻 T_cmd → T_start → T_end 一一对应：
+        t_response_s = T_start − T_cmd（K2 响应时间）
+        t_ramp_s     = T_end − T_start（K1 调节速率的爬坡时长）
+    K1 调节速率 = (P_target − P_start) / t_ramp_s
+    K2 响应时间 = t_response_s
+    K3 调节精度 = |P_ss − P_target| / Pn × 100%
     """
-    k1_actual = abs(p_end_mw - p_start_mw) / t_rise_s if t_rise_s > 0 else 0
-    k2_actual = t_settle_s
-    k3_actual = abs(p_end_mw - p_target_mw) / p_target_mw * 100 if p_target_mw > 0 else 0
+    k1_actual = abs(p_target_mw - p_start_mw) / t_ramp_s if t_ramp_s > 0 else 0.0
+    k2_actual = t_response_s
+    k3_actual = abs(p_actual_ss_mw - p_target_mw) / pn_mw * 100.0 if pn_mw > 0 else 0.0
 
     return {
-        "k1_actual_mw_per_s": round(k1_actual, 3),
+        "k1_actual_mw_per_s": round(k1_actual, 2),
         "k2_actual_s": round(k2_actual, 1),
         "k3_actual_pct": round(k3_actual, 2),
         "k1_pass": k1_actual >= k1_required,
@@ -67,16 +67,18 @@ def param_consistency_check(
 
 
 def test():
-    r = step_response_check(10, 45, 30, 35, 45, 1.6, 30, 3)
-    assert abs(r["k1_actual_mw_per_s"] - 1.167) < 0.01
-    assert not r["k2_pass"], "35s > 30s, K2 不通过"
-    assert r["k3_pass"], "0% 偏差, K3 应通过"
-    assert not r["all_pass"], "K1 和 K2 都不达标"
+    # 正文 08 章四时刻证据链：52.3→70 MW，K1=1.20、K2=0.5、K3=0.1%（全部达标）
+    r = step_response_check(52.3, 70.0, 70.1, 0.5, 14.7, 1.20, 0.5, 0.1)
+    assert abs(r["k1_actual_mw_per_s"] - 1.20) < 0.01
+    assert abs(r["k2_actual_s"] - 0.5) < 0.01
+    assert abs(r["k3_actual_pct"] - 0.1) < 0.01
+    assert r["all_pass"], "正文四时刻证据链应全部达标"
 
+    # 同一场景按华东细则限值考核：K2=0.5<60s、K3=0.1%<3% 仍通过
     p = REGION_PARAMS[Region.HUADONG]
     k1_req = p["k1_min_pn_per_min"] * PN / 60
-    r2 = step_response_check(10, 45, 30, 35, 45, k1_req, p["k2_max_s"], p["k3_max_pct"])
-    assert r2["k2_pass"], "K2=35s < 60s 华东应通过"
+    r2 = step_response_check(52.3, 70.0, 70.1, 0.5, 14.7, k1_req, p["k2_max_s"], p["k3_max_pct"])
+    assert r2["k2_pass"] and r2["k3_pass"], "K2=0.5<60s、K3=0.1%<3% 应通过"
 
     rp = param_consistency_check(
         {"deadband_mw": 5.0, "k1_min": 1.0},
@@ -99,10 +101,10 @@ def main():
     print(f"\n区域：{Region.HUADONG.value}  K1≥{k1_req:.2f}MW/s  "
           f"K2≤{p['k2_max_s']}s  K3≤{p['k3_max_pct']}%")
 
-    # 优秀场景
-    r = step_response_check(10, 45, 25, 28, 45, k1_req, p["k2_max_s"], p["k3_max_pct"])
-    print(f"\n【阶跃响应 10→45MW】")
-    print(f"  K1={r['k1_actual_mw_per_s']}MW/s "
+    # 正文 08 章四时刻证据链场景（52.3→70 MW，全部达标）
+    r = step_response_check(52.3, 70.0, 70.1, 0.5, 14.7, 1.20, 0.5, 0.1)
+    print(f"\n【正文四时刻证据链 52.3→70MW】")
+    print(f"  K1={r['k1_actual_mw_per_s']:.2f}MW/s "
           f"{'✓' if r['k1_pass'] else '✗'}")
     print(f"  K2={r['k2_actual_s']}s "
           f"{'✓' if r['k2_pass'] else '✗'}")
@@ -110,14 +112,14 @@ def main():
           f"{'✓' if r['k3_pass'] else '✗'}")
     print(f"  验收: {'✓ 通过' if r['all_pass'] else '✗ 不达标'}")
 
-    # 不达标场景
-    r2 = step_response_check(10, 38, 35, 42, 45, k1_req, p["k2_max_s"], p["k3_max_pct"])
-    print(f"\n【不及格场景 10→38MW（响应慢+超调）】")
-    print(f"  K1={r2['k1_actual_mw_per_s']:.1f}MW/s "
+    # 不达标场景：响应慢 + 爬坡慢 + 超调
+    r2 = step_response_check(52.3, 70.0, 71.0, 1.0, 25.0, 1.20, 0.5, 0.1)
+    print(f"\n【不达标场景：响应慢+爬坡慢+超调】")
+    print(f"  K1={r2['k1_actual_mw_per_s']:.2f}MW/s "
           f"{'✓' if r2['k1_pass'] else '✗'}")
     print(f"  K2={r2['k2_actual_s']}s "
           f"{'✓' if r2['k2_pass'] else '✗'}")
-    print(f"  K3={r2['k3_actual_pct']:.1f}% "
+    print(f"  K3={r2['k3_actual_pct']}% "
           f"{'✓' if r2['k3_pass'] else '✗'}")
     print(f"  验收: {'✓ 通过' if r2['all_pass'] else '✗ 不达标'}")
 

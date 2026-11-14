@@ -11,7 +11,7 @@
 > - 15 分钟：加读 K2（指令死区杀手）+ K3（调节精度 vs 控制偏差）→ 排查 K2/K3 不达标
 > - 30 分钟：完整精读 + 手算示例 → 掌握端到端整定方法
 
-## 现场场景【必读】
+## 现场场景【必懂】
 
 承接[01 章](01_ACE与AGC控制模式.md)：邻省 600 MW 机组跳闸后，省调按 TBC 算得 `ACE = −50 MW`，向华东某 **100 MW / 200 MWh 储能电站**（4 台 25 MW PCS）下发 AGC"上调 50 MW"指令。
 
@@ -102,40 +102,17 @@ flowchart TB
 → 各 PCS ramp rate ≥ 合成要求 ÷ 参与分配的 PCS 数量
 ```
 
-> 💻 **代码落地**——三级限速校验逻辑（EMS 每次收到 AGC 指令时执行）：
+> 💻 **代码落地**——三级限速校验逻辑（EMS 每次收到 AGC 指令时执行），关键片段：
 >
 > ```python
-> def check_ramp_rate_multilevel(
->     pcs_ramp: float,        # PCS 硬件级 ramp rate (MW/s)
->     ems_safety_limit: float, # EMS 安全限速 (MW/s)
->     alloc_synthesis: float,  # 分配模块合成速率 (MW/s)
->     k1_required: float,      # 调度要求 K1 (MW/s)
->     margin: float = 1.2      # 安全裕量系数
-> ) -> dict:
->     """逐层校验 AGC 多级限速链路，定位瓶颈环节"""
->     effective = min(pcs_ramp, ems_safety_limit, alloc_synthesis)
->
->     result = {
->         "k1_effective": effective,        # 实际可用 ramp rate（瓶颈值）
->         "target_with_margin": k1_required * margin,
->         "pass": effective >= k1_required * margin,
->         "bottleneck": None                # 瓶颈到底在哪一层
->     }
->
->     if not result["pass"]:
->         if pcs_ramp < k1_required * margin:
->             result["bottleneck"] = "PCS硬件"
->         elif ems_safety_limit < k1_required * margin:
->             result["bottleneck"] = "EMS安全限速"
->         else:
->             result["bottleneck"] = "分配模块合成"
->
->     return result
->
-> # 现场场景示例：K1_required=1.0 Pn/min=1.67 MW/s
-> # PCS ramp=0.8 MW/s, EMS限速=1.0 MW/s, 合成=1.2 MW/s
-> # → effective=min(0.8,1.0,1.2)=0.8 → 卡在 PCS 硬件层
+> def check_ramp_rate_multilevel(pcs_ramp, ems_safety_limit, alloc_synthesis, k1_required, margin=1.2):
+>     effective = min(pcs_ramp, ems_safety_limit, alloc_synthesis)  # 三级取最小
+>     return effective, effective >= k1_required * margin            # 瓶颈值 + 是否达标
 > ```
+>
+> 完整实现（含瓶颈定位分支）：[agc_core.py](lab/ems_lab/agc_core.py) · 端到端演示：[ch02_ramp_rate.py](lab/examples/ch02_ramp_rate.py)
+>
+> 现场场景代入：`min(0.8, 1.0, 1.2) = 0.8 MW/s`，卡在 PCS 硬件层。
 
 > **软件类比**：三级限速就像同一条流水线上**串了三个令牌桶限流器**——调度要求是"期望吞吐 1.67 MW/s"，PCS 硬件、EMS 安全限速、分配模块合成各是一个令牌桶，各自限制"每秒放出多少令牌（MW/s）"。整条链路的总吞吐由**最慢的那个桶**决定，跟另外两个桶还剩多少容量无关：你把中间那个桶无限扩容，只要最前面那个桶还是 0.8，链路吞吐就还是 0.8。
 >
@@ -286,26 +263,25 @@ EMS 指令死区：±2.0 MW
 
 边界规则是**大于等于**（`>=`）才跟踪：恰好等于死区值会跟踪，小于死区值（哪怕只小 0.1 MW）也会被判定为"变化太小"。
 
-#### 概念实现
+#### 关键代码片段
 
 ```python
-def should_track(p_new: float, p_prev: float, deadband_mw: float) -> bool:
-    """指令死区判定：变化量 |p_new − p_prev| ≥ deadband_mw 才跟踪。"""
-    return abs(p_new - p_prev) >= deadband_mw
+def should_track(p_new, p_prev, deadband_mw):
+    return abs(p_new - p_prev) >= deadband_mw   # 变化量 ≥ 死区才跟踪
 ```
 
-#### 逐拍追踪
+> 完整实现：[agc_core.py](lab/ems_lab/agc_core.py) · 端到端演示：[ch02_ramp_rate.py](lab/examples/ch02_ramp_rate.py)
 
-以 `deadband_mw = 2.0`、`p_prev = 100.0` 为例，逐拍验证四类输入：
+#### 逐拍追踪（2 拍）
+
+以 `deadband_mw = 2.0`、`p_prev = 100.0` 为例：
 
 | 拍 | 输入 p_new | 变化量 \|p_new−p_prev\| | 输出 | 说明 |
 |---|---|---|---|---|
-| t=0 | 100.0 | 0.0 | False | 初始无变化，不跟踪 |
-| t=1 | 102.0 | 2.0 | **True** | 恰好等于死区边界，跟踪 |
-| t=2 | 101.2 | 1.2 | False | 连续小步长，不跟踪 → K2 的"头号杀手" |
-| t=3 | 98.0 | 2.0 | **True** | 反向同幅，同样触发跟踪 |
+| t=0 | 101.2 | 1.2 | False | 正常小步长，不跟踪 → K2 的"头号杀手" |
+| t=1 | 102.0 | 2.0 | **True** | 边界输入：恰好等于死区，跟踪 |
 
-> t=1 与 t=2 的对比给出边界答案：变化量 2.0 会跟踪，变化量 1.2 不会——**恰好等于死区算跟踪**。
+> t=0 与 t=1 的对比给出边界答案：变化量 1.2 不会跟踪，恰好等于 2.0 会跟踪——**边界语义是大于等于（`>=`），恰好等于死区算跟踪**。
 
 ---
 
@@ -405,17 +381,16 @@ AGC 调节范围越宽，场站在辅助服务市场中的**可调节容量**越
   ④ 等一次调频退出后（频率回死区），平滑回归到 70 MW
 ```
 
-### 概念实现
+### 关键代码片段
 
 两种模式的叠加与限幅，最终都落到"总目标 = clamp(基点 + 增量, P_min, P_max)"：
 
 ```python
-def target_with_primary(p_agc_base: float, dp_primary: float,
-                        p_min: float, p_max: float) -> float:
-    """计划值模式下叠加一次调频增量并限幅。"""
-    total = p_agc_base + dp_primary
-    return max(p_min, min(total, p_max))   # 即 clamp(total, p_min, p_max)
+def target_with_primary(p_agc_base, dp_primary, p_min, p_max):
+    return max(p_min, min(p_agc_base + dp_primary, p_max))   # clamp(total, p_min, p_max)
 ```
+
+> 底层 `clamp` 见 [agc_core.py](lab/ems_lab/agc_core.py) · 端到端演示：[ch02_ramp_rate.py](lab/examples/ch02_ramp_rate.py)
 
 > 计划值模式是它的特例（`dp_primary = 0` 时总目标 = 基点）；增量模式则先算 `基点 + 增量` 再走同一个限幅。两种模式共用一套叠加逻辑，避免切模式时丢掉一次调频贡献。上面风险场景代入：`target_with_primary(70, 6, 0, 100) = 76 MW`。
 
@@ -437,26 +412,25 @@ P_total = clamp(P_agc_base + ΔP_primary, P_min, P_max)
 
 **处理原则**：如果 AGC 基点已经接近限幅，一次调频增量被裁剪时，必须记录被裁剪的部分，作为能力不足的证据（[06 章](06_AGC的IEC104链路与状态机.md)）。
 
-### 概念实现
+### 关键代码片段
 
 ```python
-def clamp(value: float, lo: float, hi: float) -> float:
-    """把 value 限制在 [lo, hi] 区间内，超界就钳到边界。"""
-    return max(lo, min(value, hi))
+def clamp(value, lo, hi):
+    return max(lo, min(value, hi))   # 超界就钳到边界
 ```
 
-### 逐拍追踪
+> 完整实现：[agc_core.py](lab/ems_lab/agc_core.py) · 端到端演示：[ch02_ramp_rate.py](lab/examples/ch02_ramp_rate.py)
 
-以 `lo = 0`、`hi = 100` 为例，逐拍验证四类输入（对应上表三种场景）：
+### 逐拍追踪（2 拍）
+
+以 `lo = 0`、`hi = 100` 为例：
 
 | 拍 | 输入 value | 输出 | 说明 |
 |---|---|---|---|
 | t=0 | 85 | 85 | 正常：80 + 5 = 85，区间内原样返回 |
-| t=1 | 100 | 100 | 恰好上边界，不裁 |
-| t=2 | 105 | 105 → 100 | 触上限：95 + 10 = 105，裁掉 5 |
-| t=3 | −5 | 0 | 触下限：10 − 15 = −5，钳到 0 |
+| t=1 | 105 | 105 → 100 | 触上限：95 + 10 = 105，裁掉 5 |
 
-> t=2 被裁掉的 5 MW 正是一次调频增量：不记录它，既丢了能力、又被考核记"未达标"——这就是上表"触上限"风险列的来源。
+> t=1 被裁掉的 5 MW 正是一次调频增量：不记录它，既丢了能力、又被考核记"未达标"——这就是上表"触上限"风险列的来源。
 
 ---
 
@@ -477,6 +451,6 @@ def clamp(value: float, lo: float, hi: float) -> float:
 
 </details>
 
-> 💻 **动手实验**：运行 `python lab/examples/ch02_ramp_rate.py` 复现本章三级限速校验（K1 瓶颈定位）与指令死区逐拍追踪（t=0/1/2/3 四拍）；运行 `python lab/tests/test_agc_core.py` 会复现本章全部断言。
+> 💻 **动手实验**：运行 `python lab/examples/ch02_ramp_rate.py` 复现本章三级限速校验（K1 瓶颈定位）与指令死区逐拍追踪（t=0/t=1 两拍）；运行 `python lab/tests/test_agc_core.py` 会复现本章全部断言。
 
 <!-- @AI_GENERATED: end -->
