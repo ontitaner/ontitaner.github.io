@@ -3,7 +3,7 @@
 
 > [课程首页](README.md) | [lab/ems_lab/](lab/ems_lab/)
 
-本附录按章节列出 `lab/ems_lab/` 中各模块的核心函数与类，供快速查阅。所有函数均已在 `lab/tests/` 中有对应的测试用例（20/20 通过）。
+本附录按章节列出 `lab/ems_lab/` 中各模块的核心函数与类，供快速查阅。所有函数均已在 `lab/tests/` 中有对应的测试用例（21/21 通过）。
 
 ---
 
@@ -12,13 +12,15 @@
 ### pi_controller.py — `class PIController`
 
 ```python
-PIController(kp: float, ki: float, out_max=15000.0, out_min=-15000.0, ts=4.0)
+PIController(kp=8000.0, ki=2000.0, out_max=500.0, out_min=-500.0, i_max=None, ts=4.0)
 ```
 
 | 方法 | 签名 | 说明 |
 |---|---|---|
-| `step` | `(error: float) → float` | 单拍 PI 迭代，返回 Q 指令值（含抗积分饱和） |
+| `step` | `(error: float) → float` | 单拍 PI 迭代，error = U_target − U_pcc，返回 Q 指令值（含抗积分饱和与输出限幅） |
 | `reset` | `() → None` | 清零积分项与历史输出 |
+
+> 默认值为 pu 体系（附录 B）。`i_max` 为积分限幅，缺省等于 `out_max`；正文 01.6/02.4 取 `i_max=300`、`out_max=500`。
 
 ---
 

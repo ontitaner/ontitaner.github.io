@@ -1,9 +1,10 @@
 # @AI_GENERATED
 """第 01 章配图：四种 AVC 控制模式在同一过压场景下的请求对比。
 
-参数对齐章节 01.2：[教学示例]
-场景：U 从 1.030→1.020→1.010→1.010 pu, P 从 800→800→400→400 kW
-定Q=−300, 定PF=−262.9/−131.5, Q-U下垂=−200/−100/0/0, 定电压PI=−500/−420/−360/−400
+参数对齐章节 01.2：[教学示例]（pu 体系）
+场景：t0 U=1.035/P=800, t1 U=1.008/P=400, t2 U=1.008/P=400
+定Q=−300/−300/−300, 定PF=−263.0/−131.5/−131.5,
+Q-U下垂=−250/0/0, 定电压PI=−500/−364/−364
 """
 from __future__ import annotations
 
@@ -14,13 +15,13 @@ from _style import (C_OK, C_ACC, C_Q_ABSORB, C_TARGET, C_LIMIT,
 
 
 def fig_modes_compare():
-    t = np.arange(4)
-    u = [1.030, 1.020, 1.010, 1.010]
-    p = [800, 800, 400, 400]
-    fixed = [-300, -300, -300, -300]
-    pf = [-262.9, -262.9, -131.5, -131.5]
-    droop = [-200, -100, 0, 0]
-    avc = [-500, -420, -360, -400]
+    t = np.arange(3)
+    u = [1.035, 1.008, 1.008]
+    p = [800, 400, 400]
+    fixed = [-300, -300, -300]
+    pf = [-263.0, -131.5, -131.5]
+    droop = [-250, 0, 0]
+    avc = [-500, -364, -364]
 
     panels = [
         ("定Q：调度设点 Q=−300 kvar", fixed, C_TARGET, "Q"),
@@ -37,7 +38,7 @@ def fig_modes_compare():
             ax.annotate(f"{val:.0f}", (k, val), xytext=(0, 9 if val < 0 else -12),
                         textcoords="offset points", ha="center", fontsize=8.5)
         ax.set_title(title, fontsize=10)
-        ax.set_xticks(t, ["t0\nU=1.030\nP=800", "t1\nU=1.020\nP=800", "t2\nU=1.010\nP=400", "t3\nU=1.010\nP=400"])
+        ax.set_xticks(t, ["t0\nU=1.035\nP=800", "t1\nU=1.008\nP=400", "t2\nU=1.008\nP=400"])
         ax.set_ylabel("Q 请求 (kvar, 吸收为负)")
         ax.set_ylim(-600, 200)
 

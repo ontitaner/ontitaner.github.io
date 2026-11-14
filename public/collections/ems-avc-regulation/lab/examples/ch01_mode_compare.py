@@ -1,55 +1,82 @@
 # @AI_GENERATED
-"""ch01 示例：三种 AVC 控制模式在同一扰动下的响应对比
+"""ch01 示例：四种 AVC 控制模式在同一过压场景下的 Q 请求对比（pu 体系）
 
-主线场景：50MW/100MWh 储能电站，PCC 110kV
-扰动：U 从 116.0 → 117.2 kV（ΔU=+1.2 kV）
+主线场景：50MW/100MWh 储能电站，PCC 110 kV（教学示例按附录 B 取标幺值）
+输入（对齐 01.2 表格）：
+  t0: U=1.035 pu, P=800 kW
+  t1: U=1.008 pu, P=400 kW
+  t2: U=1.008 pu, P=400 kW
+参数：PF=0.95（吸收），K=10000 kvar/pu，死区 ±0.01 pu，
+      Kp=8000 kvar/pu, Ki=2000 kvar/(pu·s), Ts=4s, Q_max=±500 kvar, I_max=±300 kvar。
 """
+import math
+
 from lab.ems_lab.pi_controller import PIController
 from lab.ems_lab.deadband import Deadband
 
-U_TARGET = 116.0
-DEADBAND_HALF = 0.5
+U_REF = 1.000
+U_TARGET = 1.000
+DB_HALF = 0.01
+K_DROOP = 10000.0
+Q_MAX = 500.0
+Q_SETPOINT = -300.0
+PF_TARGET = 0.95
+DIRECTION = -1  # 吸收（感性）
+
+# 场景输入
+SCENE = [
+    ("t0", 1.035, 800),
+    ("t1", 1.008, 400),
+    ("t2", 1.008, 400),
+]
 
 
-def simulate_fixed_q():
-    print("=== 模式1: 定无功 Q=−3000 kvar（固定） ===")
-    print("  ΔU=+1.2 kV → Q 不随电压变化 → 输出恒为 −3000 kvar")
-    print(f"  终态 U={U_TARGET + 1.2} kV  未恢复 → 依赖调度降低电压目标\n")
+def fixed_q(q_setpoint: float) -> float:
+    return q_setpoint
 
 
-def simulate_droop():
-    print("=== 模式2: Q-U 下垂 ===")
-    K_droop = 2500.0  # kvar/kV
-    u_measured = U_TARGET + 1.2
-    error = u_measured - U_TARGET
-    q_droop = -(K_droop * error)
-    print(f"  ΔU={error:+.1f} kV → Q={q_droop:+.0f} kvar")
-    print(f"  下垂斜率={K_droop} kvar/kV")
-    print(f"  终态存在稳态误差（不像 PI 会消除）\n")
+def fixed_pf(p_kw: float) -> float:
+    # 与正文 01.4 一致：tan(arccos(0.95)) 取 4 位小数 = 0.3287
+    tan_phi = round(math.tan(math.acos(PF_TARGET)), 4)
+    return DIRECTION * abs(p_kw) * tan_phi
 
 
-def simulate_pi():
-    print("=== 模式3: 定电压 PI（正文主力） ===")
-    pi = PIController(kp=8, ki=0.3, ts=4.0, out_max=15000, out_min=-15000)
-    deadband = Deadband(center=U_TARGET, half_width=DEADBAND_HALF)
+def q_u_droop(u_pcc_pu: float) -> float:
+    deadband = Deadband(center=U_REF, half_width=DB_HALF)
+    delta_u_db = deadband.apply(u_pcc_pu)
+    q = -K_DROOP * delta_u_db
+    return max(-Q_MAX, min(Q_MAX, q))
 
-    error = 1.2
-    snapshots = [0, 2, 5, 10, 20, 40, 80]
-    for t in range(1, 120):
-        err = deadband.apply(U_TARGET + 1.2) if deadband.in_deadband(U_TARGET + 1.2) else error
-        q = pi.step(err)
-        error = 1.2 * max(0, 1 - q / 8000 * 10 / 120)
-        if t in snapshots:
-            u_est = U_TARGET + 1.2 - abs(q) / 8000 * 1.2
-            print(f"  t={t:3d}s  Q={q:+7.0f} kvar  U_est={u_est:.2f} kV")
-    print(f"  终态 Q={pi.last_output:+7.0f} kvar  电压恢复至目标\n")
+
+def voltage_pi(u_series: list[float]) -> list[float]:
+    pi = PIController(kp=8000, ki=2000, ts=4.0,
+                      out_max=500, out_min=-500, i_max=300)
+    outputs = []
+    for u_pcc in u_series:
+        error = U_TARGET - u_pcc  # 电压偏高为负
+        outputs.append(pi.step(error))
+    return outputs
 
 
 def main():
-    print("AVC 三种控制模式对比  [主线: 50MW/100MWh 储能电站, PCC=110kV]\n")
-    simulate_fixed_q()
-    simulate_droop()
-    simulate_pi()
+    print("AVC 四种控制模式对比  [主线: 50MW/100MWh 储能电站, PCC=110kV]\n")
+
+    u_series = [u for _, u, _ in SCENE]
+    pi_outputs = voltage_pi(u_series)
+
+    print(f"{'时刻':<6}{'U(pu)':>8}{'P(kW)':>8}{'定Q':>9}{'定PF':>9}{'下垂':>9}{'定电压PI':>11}")
+    for i, (tag, u, p) in enumerate(SCENE):
+        q_fixed = fixed_q(Q_SETPOINT)
+        q_pf = fixed_pf(p)
+        q_droop = q_u_droop(u)
+        q_pi = pi_outputs[i]
+        print(f"{tag:<6}{u:>8.3f}{p:>8d}{q_fixed:>9.0f}{q_pf:>9.1f}"
+              f"{q_droop:>9.0f}{q_pi:>11.0f}")
+
+    print("\n关键观察：")
+    print("  t0（U=1.035 过压）→ 定Q=−300、定PF=−263.0、下垂=−250、PI=−500（被限幅）")
+    print("  t1/t2（U=1.008 落死区）→ 下垂=0（只看此刻），PI=−364（I 记住历史偏差）")
+    print("  差异根源：定Q看设点，定PF看当前P，下垂看当前U，PI看 U+历史积分。")
 
 
 if __name__ == "__main__":
