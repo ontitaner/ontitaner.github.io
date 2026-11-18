@@ -1,0 +1,10 @@
+{
+  "_comment": "@AI_GENERATED",
+  "name": "储能EMS算法入门",
+  "order": 20,
+  "description": "从电池、BMS、PCS 到 EMS 调度能力的基础课程",
+  "icon": "⚡",
+  "level": "入门",
+  "cover": "img/cover.png",
+  "_comment_end": "@AI_GENERATED: end"
+}

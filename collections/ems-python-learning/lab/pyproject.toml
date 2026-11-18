@@ -1,0 +1,10 @@
+[project]
+name = "ems-lab"
+version = "0.1.0"
+description = "EMS 课程配套实验代码与测试"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+

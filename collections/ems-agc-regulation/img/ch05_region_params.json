@@ -1,0 +1,24 @@
+{
+  "_comment": "@AI_GENERATED",
+  "figure": "ch05_region_params.png",
+  "numbers": [
+    0.1,
+    0.3,
+    0.5,
+    1.0,
+    1.5,
+    2.0,
+    3.0,
+    4.0,
+    5.5,
+    8.0,
+    9.5,
+    13.5,
+    30.0,
+    60.0,
+    75.0,
+    80.0,
+    100.0
+  ],
+  "_comment_end": "@AI_GENERATED: end"
+}
