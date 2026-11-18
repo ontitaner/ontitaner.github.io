@@ -49,7 +49,7 @@ def main():
 
     # --- 03.3 SOC 可持续时间 ---
     t = support_duration_h(20_000.0, 5_000.0)      # 20 MWh / 5 MW
-    print(f"[03.3] SOC 剩 20 MWh、持续支撑 5 MW -> 可持续 {t:.1f} h")
+    print(f"[03.3] SOC 剩 20 MWh、持续顶住 5 MW 缺口 -> 可持续 {t:.1f} h")
 
     # --- 03.4 一次调频融合：D↔δ 与死区对比 ---
     D = droop_to_D(3.0)                            # δ=3% -> D
