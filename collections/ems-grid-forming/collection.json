@@ -1,0 +1,10 @@
+{
+  "_comment": "@AI_GENERATED",
+  "name": "EMS 构网型储能：从“跟着电网走”到“帮电网撑住”",
+  "order": 41,
+  "description": "面向储能/新能源场站EMS开发者的构网型工程教程：覆盖VSG建模、惯量与电压支撑、并离网切换与黑启动、EMS控制链路及并网验收结算全链路",
+  "icon": "⚡",
+  "level": "进阶",
+  "cover": "img/cover.png",
+  "_comment_end": "@AI_GENERATED: end"
+}
