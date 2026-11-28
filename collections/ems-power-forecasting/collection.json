@@ -1,0 +1,10 @@
+{
+  "_comment": "@AI_GENERATED",
+  "name": "EMS 新能源功率预测：从辐照/风速到调度交易结算的闭环",
+  "order": 25,
+  "description": "面向储能/新能源场站EMS开发者的功率预测工程教程：覆盖光伏风电出力转换、NWP气象源、短期与超短期预测、误差指标与考核细则及对日前排程与现货报价的收益影响全链路",
+  "icon": "🌤️",
+  "level": "进阶",
+  "cover": "img/cover.png",
+  "_comment_end": "@AI_GENERATED: end"
+}
